@@ -12,9 +12,12 @@ The app has the following functionality:
 (4) Following other users;
 
 (5) Making comments on photos;
+
 (6) Up-voting and down-voting photos.
 
-demo
+
+<a href="https://www.webkang.com">demo</a>
+
 
 ## Getting Started
 
