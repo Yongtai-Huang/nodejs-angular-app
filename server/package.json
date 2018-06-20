@@ -1,0 +1,40 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "node.js, angular 6 application: photo sharing",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "(https://github.com/Yongtai-Huang/node-angular-app.git\u001b[D\u001b[C)"
+  },
+  "keywords": [
+    "node.js",
+    "angular 6",
+    "express",
+    "mongoDB",
+    "multer"
+  ],
+  "author": "Yongtai Huang",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "ejs": "^2.6.1",
+    "errorhandler": "^1.5.0",
+    "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
+    "jsonwebtoken": "^8.3.0",
+    "method-override": "^2.3.10",
+    "methods": "^1.1.2",
+    "mongoose": "^5.1.5",
+    "mongoose-unique-validator": "^2.0.1",
+    "morgan": "^1.9.0",
+    "multer": "^1.3.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "slug": "^0.9.1"
+  }
+}
