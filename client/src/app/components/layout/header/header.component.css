@@ -1,0 +1,20 @@
+nav {
+  /* background-color: #cb3837!important; */
+  background-color: #1289A7!important;
+}
+.navbar-brand {
+  font-size: 20px;
+  color: orange;
+  margin-left: 1em!important;
+}
+
+.navbar-nav li a {
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+.user-pic {
+  height: 26px;
+  border-radius: 50px;
+  float: left;
+}

@@ -1,0 +1,19 @@
+.text-username {
+  /* color: blue; */
+  padding-top: 1em;
+}
+
+.user-image {
+  padding-bottom: 0.25em;
+}
+
+.nav-link {
+  text-transform: capitalize;
+  margin-right: 0.25em;
+}
+
+img {
+  margin-top: 1em;
+  max-width: 200px;
+  max-height: 200px;
+}

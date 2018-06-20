@@ -1,0 +1,127 @@
+<div class="container">
+  <div class="row photo-content">
+    <div class="col-md-12">
+      <img class="photo-img mx-auto d-block" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
+      <h4><strong>{{ photo.title }}</strong></h4>
+      <div class="photo-description" [innerHTML]="photo.description"></div>
+
+      <ul class="tag-list list-unstyled">
+        <li *ngFor="let tag of photo.tagList"
+          class="badge badge-pill badge-light">
+          <h6>{{ tag }}</h6>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <app-list-errors [errors]="errors"></app-list-errors>
+
+  <div class="banner">
+    <div class="row">
+      <div class="col-md-7">
+        <a *ngIf="photo.takenBy.image" [routerLink]="['/profile', photo.takenBy.username]">
+          <img src="{{avatar_url}}{{photo.takenBy.image}}" class="photo-takenBy-img" />
+        </a>
+        <div class="info">
+          <a class="takenBy text-primary"
+            [routerLink]="['/profile', photo.takenBy.username]">
+            <strong>{{ photo.takenBy.username }}</strong>
+          </a>
+          <span class="date text-muted">
+            &nbsp;&nbsp;{{ photo.createdAt | date: 'short' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-md-5 text-right">
+        <span [hidden]="!canModify">
+          <button class="btn btn-sm btn-warning"
+             [routerLink]="['/photo-edit', photo.slug]">
+            <i class="fa fa-pencil" aria-hidden="true"></i>&nbsp;Edit
+          </button>
+          <button class="btn btn-sm btn-warning"
+            [ngClass]="{disabled: isDeleting}"
+            (click)="deletePhoto()">
+            <i class="fa fa-trash" aria-hidden="true"></i>&nbsp;Delete
+          </button>
+        </span>
+
+        <span [hidden]="canModify" class="text-right">
+          <button
+            class="btn btn-sm"
+            [hidden]="!isAuthenticated"
+            [ngClass]="{ 'disabled': isSubmittingFollow,
+                         'btn-light': profile.following }"
+            (click)="toggleFollowing()">
+            <span *ngIf="!profile.following"><i class="fa fa-plus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+            <span *ngIf="profile.following"><i class="fa fa-minus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+            {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.username }}
+          </button>
+
+          <button class="btn btn-sm"
+           [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote,
+                        'btn-light': photo.upvoted }"
+           (click)="toggleUpvote()">
+            <i class="fa fa-thumbs-o-up fa-lg text-secondary" aria-hidden="true"></i>
+            <span *ngIf="photo.upvotesCount > 0">
+              &nbsp;{{ photo.upvotesCount }}
+            </span>
+          </button>
+
+          <button class="btn btn-sm"
+           [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote,
+                        'btn-light': photo.downvoted }"
+           (click)="toggleDownvote()">
+            <i class="fa fa-thumbs-o-down fa-lg text-secondary" aria-hidden="true"></i>
+            <span *ngIf="photo.downvotesCount > 0">
+              &nbsp;{{ photo.downvotesCount }}
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <div class="row">
+    <div class="col-xs-12 col-md-12">
+      <div *appShowAuthed="true">
+
+        <button *ngIf="!isCommenting" class="btn btn-primary btn-sm" (click)="toComment()">
+          <i class="fa fa-pencil" aria-hidden="true"></i>&nbsp;Write A Comment
+        </button>
+
+        <form *ngIf="isCommenting" class="pcomment-form" #photoCommentForm (ngSubmit)="addPhotoComment()">
+          <div class="card-block">
+            <textarea class="form-control"
+              placeholder="Write a comment..."
+              rows="3"
+              [formControl]="photoCommentControl">
+            </textarea>
+          </div>
+          <div>
+            <button class="btn btn-sm btn-primary"
+              [disabled]="!photoCommentControl.valid && !isSubmittingComment" type="submit">
+               Post Comment
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div *appShowAuthed="false">
+        <a [routerLink]="['/login']">Sign in</a> or
+        <a [routerLink]="['/register']">sign up</a>
+        to add comments on this photo.
+      </div>
+      <hr />
+
+      <h5 class="text-info"><strong>Comments</strong></h5>
+      <app-photo-comment
+        *ngFor="let photoComment of photoComments"
+        [photoComment]="photoComment"
+        (deletePhotoComment)="onDeletePhotoComment(photoComment)">
+      </app-photo-comment>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-9">
+          <a *ngIf="photoComment.author.image" class="comment-author-img"
+           [routerLink]="['/profile', photoComment.author.username]">
+            <img *ngIf="photoComment.author.image"
+             src="{{avatar_url}}{{photoComment.author.image}}"
+             class="comment-author-img" />
+          </a>
+          <a class="comment-author"
+           [routerLink]="['/profile', photoComment.author.username]">
+            <strong>{{ photoComment.author.username }}</strong>
+          </a>
+          <span class="date-posted">
+            &nbsp;&nbsp;&nbsp;{{ photoComment.createdAt | date: 'short' }}
+          </span>
+        </div>
+
+      <div class="col-md-3">
+        <span class="mod-options" [hidden]="!canModify">
+          <a (click)="deleteClicked()" class="btn btn-light float-right">
+            <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;Delete
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-block">
+    <p class="card-text"> {{ photoComment.body }} </p>
+  </div>
+</div>

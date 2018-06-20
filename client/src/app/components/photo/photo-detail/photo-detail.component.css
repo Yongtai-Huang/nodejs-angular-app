@@ -1,0 +1,27 @@
+.banner {
+  padding-top: 0.5em;
+}
+
+.card-block {
+  padding-bottom: 0.5em;
+  margin-bottom: 0.1em;
+}
+
+.photo-img {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  width: auto;
+  max-width: 100%;
+}
+
+.photo-takenBy-img {
+  height: 30px;
+  width: 30px;
+  border-radius: 50px;
+  float: left;
+  margin-right: 5px;
+}
+
+.date {
+  font-size: 13px;
+}

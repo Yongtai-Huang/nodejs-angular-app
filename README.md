@@ -2,10 +2,15 @@
 Photo-sharing app with node.js and angular 6.
 
 The app has the following functionality:
+
 (1) User sign up and sign in, and user authentication with JSON Web Token (JWT);
+
 (2) Uploading and updating image files, and viewing photos;
+
 (3) Profiles with images;
+
 (4) Following other users;
+
 (5) Making comments on photos;
 (6) Up-voting and down-voting photos.
 

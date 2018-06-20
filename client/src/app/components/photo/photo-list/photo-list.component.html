@@ -1,0 +1,28 @@
+<div class="row">
+  <app-photo-preview class="col-md-4 col-sm-12"
+    *ngFor="let photo of photos"
+    [photo]="photo">
+  </app-photo-preview>
+</div>
+
+<div class="photo-preview"
+  [hidden]="!loading">
+  Loading photos...
+</div>
+
+<div class="photo-preview"
+  [hidden]="loading || photos.length">
+  No photos are here... yet.
+</div>
+
+<nav [hidden]="loading || totalPages.length <= 1">
+  <ul class="pagination">
+    <li class="page-item"
+      [ngClass]="{'active': pageNumber === currentPage}"
+      *ngFor="let pageNumber of totalPages"
+      (click)="setPageTo(pageNumber)">
+
+      <a class="page-link">{{ pageNumber }}</a>
+    </li>
+  </ul>
+</nav>

@@ -1,0 +1,51 @@
+<div class="photo-preview">
+  <app-list-errors [errors]="errors"></app-list-errors>
+  <div class="card border-light">
+    <a [routerLink]="['/photo', photo.slug]">
+      <img class="mx-auto d-block" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
+      <h5 class="text-primary text-center"><strong>{{ photo.title }}</strong></h5>
+    </a>
+
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-7">
+          <a *ngIf="photo.takenBy.image" [routerLink]="['/profile', photo.takenBy.username]">
+            <img src="{{avatar_url}}{{photo.takenBy.image}}" class="photo-takenBy-img" />
+          </a>
+
+          <div class="takenBy">
+            <a class="takenBy text-primary"
+              [routerLink]="['/profile', photo.takenBy.username]">
+              <strong>{{ photo.takenBy.username }}</strong>
+            </a>
+            <span class="date text-muted">
+              &nbsp;&nbsp;{{ photo.createdAt | date: 'short' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-md-5 text-right">
+          <button class="btn btn-sm"
+           [disabled]="!canVote || isSubmittingVote || !isAuthenticated"
+           [ngClass]="{ 'btn-light': photo.upvoted }"
+           (click)="toggleUpvote()">
+            <i class="fa fa-thumbs-o-up fa-lg text-secondary" aria-hidden="true"></i>
+            <span *ngIf="photo.upvotesCount > 0">
+              &nbsp;{{ photo.upvotesCount }}
+            </span>
+          </button>
+
+          <button class="btn btn-sm"
+           [disabled]="!canVote || isSubmittingVote || !isAuthenticated"
+           [ngClass]="{ 'btn-light': photo.downvoted }"
+           (click)="toggleDownvote()">
+            <i class="fa fa-thumbs-o-down fa-lg text-secondary" aria-hidden="true"></i>
+            <span *ngIf="photo.downvotesCount > 0">
+              &nbsp;{{ photo.downvotesCount }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

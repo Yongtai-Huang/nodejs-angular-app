@@ -1,0 +1,28 @@
+.comment-author {
+  color: red;
+}
+
+.comment-author-img {
+  height: 30px;
+  width: 30px;
+  border-radius: 50px;
+  float: left;
+  margin-right: 5px;
+}
+
+.date-posted {
+  color: green;
+  font-size: 13px;
+}
+
+.card {
+  margin-top: 0.5em;
+}
+
+.card-block {
+  padding: 0.5em;
+}
+
+.card-text {
+  font-size: 14px;
+}

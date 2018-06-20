@@ -1,0 +1,28 @@
+.photo-takenBy-img {
+  height: 26px;
+  width: 26px;
+  border-radius: 50px;
+  float: left;
+  margin-right: 5px;
+}
+
+.date {
+  font-size: 13px;
+}
+
+.card {
+  margin-top: 0.5em;
+}
+
+.article-preview {
+  padding-top: 2em;
+}
+
+.badge {
+  margin: 0.1em;
+}
+
+img {
+  width: auto;
+  max-width: 100%;
+}

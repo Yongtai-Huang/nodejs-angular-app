@@ -1,0 +1,12 @@
+
+.page-header {
+  padding-bottom: 0.5em;
+  padding-top: 0.5em;
+}
+
+.user-image {
+  margin-top: 1em;
+  max-width: 200px;
+  max-height: 200px;
+  padding-bottom: 0.25em;
+}

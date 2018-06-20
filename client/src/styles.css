@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+body{
+ margin-bottom: 48px;
+}
+
+.btn {
+  text-transform: capitalize;
+  margin: 0 0.1em 0 0.1em;
+}
+
+.text-primary {
+  color: #121212!important;
+}

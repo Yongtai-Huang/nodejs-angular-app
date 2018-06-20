@@ -1,0 +1,35 @@
+.photos-page {
+  margin-top: 1em;
+}
+
+.logo-font {
+  color: #007bff!important;
+}
+
+.nav-link {
+  cursor: pointer;
+  margin-right: 0.25em;
+}
+
+.tags {
+  margin-top: 1em;
+  padding: 0.25em;
+}
+
+.feed-toggle ul li a {
+  text-transform: capitalize;
+  margin-bottom: 0.5em;
+}
+
+.feed-toggle ul li a:hover {
+  background-color: #ddffdd;
+}
+
+.badge {
+  margin: 0.25em;
+  cursor: pointer;
+}
+
+.badge:hover {
+  background-color: #ddffdd;
+}

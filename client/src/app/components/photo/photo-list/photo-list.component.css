@@ -1,0 +1,7 @@
+.pagination {
+  margin-top: 2em;
+}
+
+.pagination li a:hover {
+  background-color: #ddffdd;
+}
