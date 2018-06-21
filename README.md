@@ -56,3 +56,7 @@ http://localhost:4200
 ## License
 
 This project is licensed under the MIT License.
+
+## Key Words
+
+Angular 6, Node.js, Express, MongoDb, Multer, Bootstrap 4
