@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 import { User } from '../../../models/user.model';
 import { Profile } from '../../../models/profile.model';
@@ -14,6 +15,7 @@ import { Errors } from '../../../models/errors.model';
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
+  pageTitle = 'Profile';
   avatar_url = environment.avatar_url;
   profile: Profile;
   currentUser: User;
@@ -23,6 +25,7 @@ export class ProfileComponent implements OnInit {
   isAuthenticated: boolean;
 
   constructor(
+    private title: Title,
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
@@ -42,6 +45,8 @@ export class ProfileComponent implements OnInit {
     this.userService.isAuthenticated.subscribe( (authenticated) => {
       this.isAuthenticated = authenticated;
     });
+
+    this.title.setTitle(this.pageTitle);
   }
 
   toggleFollowing() {

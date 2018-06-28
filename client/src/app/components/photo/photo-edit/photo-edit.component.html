@@ -1,9 +1,6 @@
   <div class="container">
-    <h4 *ngIf="photo.slug" class="page-header text-center text-primary">
-      <strong>Update Photo</strong>
-    </h4>
-    <h4 *ngIf="!photo.slug" class="page-header text-center text-primary">
-      <strong>Upload New Photo</strong>
+    <h4 class="page-header text-center text-primary">
+      <strong>{{pageTitle}}</strong>
     </h4>
     <div *ngIf="photo.image">
       <p class="text"><strong>Uploaded Photo:</strong></p>

@@ -16,7 +16,7 @@ const app = express();
 
 app.use(cors());
 
-// middlewares
+// Middlewares
 app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -37,25 +37,25 @@ if(isProduction){
   mongoose.set('debug', true);
 }
 
-//models
+// Models
 require('./models/user');
 require('./models/photo_comment');
 require('./models/photo');
 
-//passport
+// Passport
 require('./config/passport');
 
 //routes
 app.use(require('./routes'));
 
-/// catch 404 and forward to error handler
+/// Catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-// development error handler
+// Development error handler
 if (!isProduction) {
   app.use(function(err, req, res, next) {
     console.log(err.stack);
@@ -69,7 +69,7 @@ if (!isProduction) {
   });
 }
 
-// production error handler
+// Production error handler
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.json({'errors': {
@@ -78,7 +78,7 @@ app.use(function(err, req, res, next) {
   }});
 });
 
-// start the server...
+// Start the server...
 const server = app.listen( process.env.PORT || 3000, function(){
   console.log('Listening on port ' + server.address().port);
 });

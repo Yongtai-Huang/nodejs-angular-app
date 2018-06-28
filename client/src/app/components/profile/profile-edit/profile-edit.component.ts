@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 import { User } from '../../../models/user.model';
 import { UserService } from '../../../services/user.service';
@@ -13,6 +14,7 @@ import { Errors } from '../../../models/errors.model';
   styleUrls: ['./profile-edit.component.css']
 })
 export class ProfileEditComponent implements OnInit {
+  pageTitle = 'Edit Profile';
   avatar_url = environment.avatar_url;
   user: User = {} as User;
   profileEditForm: FormGroup;
@@ -27,6 +29,7 @@ export class ProfileEditComponent implements OnInit {
   removeAvatar: boolean = false;
 
   constructor(
+    private title: Title,
     private router: Router,
     private userService: UserService,
     private fb: FormBuilder
@@ -48,6 +51,8 @@ export class ProfileEditComponent implements OnInit {
     Object.assign(this.user, this.userService.getCurrentUser());
     // Fill the form
     this.profileEditForm.patchValue(this.user);
+
+    this.title.setTitle(this.pageTitle);
   }
 
   onRemoveAvatar() {

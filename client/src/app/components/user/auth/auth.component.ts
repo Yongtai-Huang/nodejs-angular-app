@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -11,8 +12,8 @@ import { UserService } from '../../../services/user.service';
   styleUrls: ['./auth.component.css']
 })
 export class AuthComponent implements OnInit {
-  authType: String = '';
-  action: String = '';
+  authType: string = '';
+  pageTitle: string = '';
   errors: Errors = new Errors();
   isSubmitting = false;
   authForm: FormGroup;
@@ -21,6 +22,7 @@ export class AuthComponent implements OnInit {
   formData: FormData = new FormData();
 
   constructor(
+    private title: Title,
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
@@ -37,8 +39,8 @@ export class AuthComponent implements OnInit {
     this.route.url.subscribe(data => {
       // Get the last piece of the URL (it's either 'login' or 'register')
       this.authType = data[data.length - 1].path;
-      // Set a action for the page accordingly
-      this.action = (this.authType === 'login') ? 'Sign in' : 'Sign up';
+      // Set a page title for the page accordingly
+      this.pageTitle = (this.authType === 'login') ? 'Sign in' : 'Sign up';
       // Add form control for username if this is the register page
       if (this.authType === 'register') {
         this.authForm.addControl('username', new FormControl());
@@ -47,6 +49,8 @@ export class AuthComponent implements OnInit {
         this.authForm.addControl('uploadFile', new FormControl());
       }
     });
+
+    this.title.setTitle(this.pageTitle);
   }
 
   fileChange(event) {

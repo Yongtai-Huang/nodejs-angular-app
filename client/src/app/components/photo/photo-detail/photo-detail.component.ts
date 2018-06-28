@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 import { Photo } from '../../../models/photo.model';
 import { PhotoComment } from '../../../models/photo-comment.model';
@@ -20,6 +21,7 @@ import { Errors } from '../../../models/errors.model';
   styleUrls: ['./photo-detail.component.css']
 })
 export class PhotoDetailComponent implements OnInit {
+  pageTitle = 'Photo Detail';
   photo_url = environment.photo_url;
   avatar_url = environment.avatar_url;
   photo: Photo;
@@ -38,6 +40,7 @@ export class PhotoDetailComponent implements OnInit {
   isAuthenticated: boolean;
 
   constructor(
+    private title: Title,
     private route: ActivatedRoute,
     private photosService: PhotosService,
     private photoCommentsService: PhotoCommentsService,
@@ -67,6 +70,8 @@ export class PhotoDetailComponent implements OnInit {
     this.userService.isAuthenticated.subscribe( (authenticated) => {
       this.isAuthenticated = authenticated;
     });
+
+    this.title.setTitle(this.pageTitle);
   }
 
   toggleUpvote() {

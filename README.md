@@ -31,26 +31,26 @@ angular CLI: v6.0.7+
 
 mongodb: v3.6
 
-### Installing
+### Installing and startup
 
-git clone https://github.com/Yongtai-Huang/node-angular-app.git
+git clone https://github.com/Yongtai-Huang/nodejs-angular-app.git
 
-To start the server:
+To install dependencies and start the server:
 
 <pre>
-cd server
+cd nodejs-angular-app/server
 npm install
 node server.js
 </pre>
 
-To start the client:
+To install dependencies and start the client:
 <pre>
-cd client
+cd nodejs-angular-app/client
 npm install
 ng serve
 </pre>
 
-Open your browser and go to
+Open your browser and navigate to
 http://localhost:4200
 
 ## License

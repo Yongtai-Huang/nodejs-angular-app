@@ -16,9 +16,7 @@ const PhotoSchema = new mongoose.Schema({
   photoComments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PhotoComment' }], //pcomments => comments ??
   tagList: [{ type: String }],
   takenBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  takenAt: Date //,
-  // latitude: Number,
-  // longitude: Number
+  takenAt: Date
 }, {timestamps: true});
 
 PhotoSchema.plugin(uniqueValidator, {message: 'is already taken'});
@@ -92,9 +90,7 @@ PhotoSchema.methods.toJSONFor = function(user){
     downvoted: user ? user.isPhotoDownvote(this._id) : false,
     tagList: this.tagList,
     takenBy: this.takenBy.toProfileJSONFor(user), // The profile of the person that took the photo
-    takenAt: this.takenAt,
-    // latitude: this.latitude,
-    // longitude: this.longitude
+    takenAt: this.takenAt
   };
 };
 

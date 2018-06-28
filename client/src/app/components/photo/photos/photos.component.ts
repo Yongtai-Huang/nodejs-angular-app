@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 import { PhotoListConfig } from '../../../models/photo-list-config.model';
 import { PhotoTagsService } from '../../../services/photo-tags.service';
@@ -11,6 +12,7 @@ import { UserService } from '../../../services/user.service';
   styleUrls: ['./photos.component.css']
 })
 export class PhotosComponent implements OnInit {
+  pageTitle = 'Photo list';
   isAuthenticated: boolean;
   limit: number = 6;
   photoListConfig: PhotoListConfig = {
@@ -21,6 +23,7 @@ export class PhotosComponent implements OnInit {
   photoTagsLoaded = false;
 
   constructor(
+    private title: Title,
     private router: Router,
     private photoTagsService: PhotoTagsService,
     private userService: UserService
@@ -48,6 +51,8 @@ export class PhotosComponent implements OnInit {
       this.photoTags = tags;
       this.photoTagsLoaded = true;
     });
+
+    this.title.setTitle(this.pageTitle);
 
   }
 

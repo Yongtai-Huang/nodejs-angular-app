@@ -17,14 +17,11 @@ const UserSchema = new mongoose.Schema({
     match: [/\S+@\S+\.\S+/, 'is invalid'], index: true},
   bio: String,
   image: String,
-  //articleUpvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
-  //articleDownvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
   photoUpvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
   photoDownvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   hash: String,
-  salt: String  //,
-  // code: String   // For account restoration
+  salt: String
 }, {timestamps: true});
 
 UserSchema.plugin(uniqueValidator, {message: 'is already taken.'});

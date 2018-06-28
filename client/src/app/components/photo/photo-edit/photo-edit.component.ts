@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+
 import { Errors } from '../../../models/errors.model';
 import { Photo } from '../../../models/photo.model';
 import { PhotosService } from '../../../services/photos.service';
@@ -12,6 +14,7 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./photo-edit.component.css']
 })
 export class PhotoEditComponent implements OnInit {
+  pageTitle = 'Upload New Photo';
   photo_url = environment.photo_url;
   photo: Photo = new Photo();
   photoForm: FormGroup;
@@ -24,6 +27,7 @@ export class PhotoEditComponent implements OnInit {
   formData: FormData = new FormData();
 
   constructor(
+    private title: Title,
     private photosService: PhotosService,
     private route: ActivatedRoute,
     private router: Router,
@@ -43,9 +47,12 @@ export class PhotoEditComponent implements OnInit {
     this.route.data.subscribe( (data: {photo: Photo}) => {
       if (data.photo) {
         this.photo = data.photo;
+        this.pageTitle = "Update Photo";
         this.photoForm.patchValue(data.photo);
       }
     });
+
+    this.title.setTitle(this.pageTitle);
   }
 
   addTag() {
