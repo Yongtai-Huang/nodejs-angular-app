@@ -3,20 +3,24 @@ Photo-sharing app with node.js and angular 6.
 
 The app has the following functionality:
 
-(1) User sign up and sign in, and user authentication with JSON Web Token (JWT);
+(1) User sign up, and update;
 
-(2) Uploading and updating image files, and viewing photos;
+(2) user authentication and authorization with JSON Web Token (JWT);
 
-(3) Profiles with images;
+(3) Uploading, updating, and removing photos;
 
-(4) Following other users;
+(4) Profiles with images;
 
-(5) Making comments on photos;
+(5) Following other users;
 
-(6) Up-voting and down-voting photos.
+(6) Making comments on photos;
+
+(7) Up-voting and down-voting photos.
 
 
-<a href="https://www.webkang.com">demo</a>
+<a href="https://webkang.com/photos">Demo</a>
+
+<a href="https://webkang.com/articles">Tutorial</a>
 
 
 ## Getting Started

@@ -9,6 +9,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { AuthComponent } from './components/user/auth/auth.component';
+import { AdminUserComponent } from './components/admin/admin-user/admin-user.component';
 import { FooterComponent } from './components/layout/footer/footer.component';
 import { HeaderComponent } from './components/layout/header/header.component';
 import { ListErrorsComponent } from './components/list-errors/list-errors.component';
@@ -29,9 +30,9 @@ import { PhotoDownvotesComponent } from './components/profile/photo-downvotes/ph
 import { ShowAuthedDirective } from './directives/show-authed.directive';
 import { AuthGuard } from './guard/auth.guard';
 import { NoAuthGuard } from './guard/no-auth.guard';
+import { AdminSuperUserGuard } from './guard/admin-super-user.guard';
 import { MarkdownPipe } from './pipes/markdown.pipe';
 
-//import { environment } from '../environments/environment';
 
 import { ApiService } from './services/api.service';
 import { PhotosService } from './services/photos.service';
@@ -60,6 +61,7 @@ const rootRouting: ModuleWithProviders = RouterModule.forRoot([
     { path: 'photo-upvotes', component: PhotoUpvotesComponent },
     { path: 'photo-downvotes', component: PhotoDownvotesComponent }] },
   { path: 'profile-edit', component: ProfileEditComponent, canActivate: [AuthGuard] },
+  { path: 'admin-user', component: AdminUserComponent, canActivate: [AdminSuperUserGuard] },
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: AboutComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' }
@@ -75,6 +77,7 @@ const rootRouting: ModuleWithProviders = RouterModule.forRoot([
     HeaderComponent,
     MarkdownPipe,
     AuthComponent,
+    AdminUserComponent,
     ProfileComponent,
     ProfileEditComponent,
     PhotoEditComponent,
@@ -103,6 +106,7 @@ const rootRouting: ModuleWithProviders = RouterModule.forRoot([
     ShowAuthedDirective,
     AuthGuard,
     NoAuthGuard,
+    AdminSuperUserGuard,
     MarkdownPipe,
     ApiService,
     PhotoDetailResolverService,

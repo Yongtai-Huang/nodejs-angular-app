@@ -41,6 +41,59 @@ let mimetype = filetypes.test(file.mimetype);
   }
 }
 
+// Get all users
+router.get('/', auth.adminSuperUser, function(req, res, next) {
+  User.find().then(function(users){
+    return res.json({
+      users: users.map(function(user){
+        return user.toAuthJSON();
+      })
+    });
+  }).catch(next);
+});
+
+// Add user's admin role
+router.post('/admin/:username', auth.superUser, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user){
+    if(!user || !user.roles.indexOf('SUPERUSER') < 0){ res.sendStatus(401); }
+
+    User.findOne({username: req.params.username}).then(function(userData){
+      if(!userData){ res.sendStatus(404); }
+      // Cannot remove the user's admin role himself
+      //if(!userData || userData.username === user.username){ res.sendStatus(404); }
+
+      userData.roles.push('ADMIN');
+      //userData.roles.push('SUPERUSER');
+
+      userData.save().then( function(usr) {
+        res.json({usr: usr.toAuthJSON()});
+      });
+
+    })
+  }).catch(next);
+});
+
+// Remove user's admin role
+router.delete('/admin/:username', auth.superUser, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user){
+    if(!user || !user.roles.indexOf('SUPERUSER') < 0){ res.sendStatus(401); }
+
+    User.findOne({username: req.params.username}).then(function(userData){
+      if(!userData){ res.sendStatus(404); }
+      // Cannot remove the user's admin role himself
+      //if(!userData || userData.username === user.username){ res.sendStatus(404); }
+
+      let ind = userData.roles.indexOf('ADMIN');
+      userData.roles.splice(ind, 1);
+
+      userData.save().then( function(usr) {
+        res.json({usr: usr.toAuthJSON()});
+      });
+
+    })
+  }).catch(next);
+});
+
 // Get user
 router.get('/user', auth.required, function(req, res, next){
   User.findById(req.payload.id).then(function(user){

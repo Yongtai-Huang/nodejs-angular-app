@@ -1,0 +1,48 @@
+.page-header {
+  margin-top: 0.5em;
+}
+
+.user-box {
+  margin: 1em;
+  padding: 1em;
+  border-style: solid;
+  /* border-color: #D3D3D3; */
+  /* border-color: #29ABE0; */
+  border-color: #ced4da;
+  border-width: 1px;
+  /* background-color: #f1f1f1; */
+  border-radius: 5px;
+}
+
+.admin {
+  background-color: #f1f1f1;
+}
+
+.super-user {
+  background-color: gold;
+}
+
+.user-image {
+  height: 50px;
+  width: 50px;
+  border-radius: 50px;
+  /* float: right; */
+  /* margin-right: 5px; */
+}
+
+a {
+  color: #3E3F3A;
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  text-decoration: underline;
+}
+
+.admin-button {
+  display: none;
+}
+
+.user-box:hover .admin-button {
+  display : block;
+}

@@ -16,9 +16,4 @@ export class PhotoTagsService {
     .pipe(map(data => data.tags));
   }
 
-  // getMPTags(): Observable<[string]> {
-  //   return this.apiService.get('/photoTags/mapPhotoTags') //??
-  //   .pipe(map(data => data.tags));
-  // }
-
 }

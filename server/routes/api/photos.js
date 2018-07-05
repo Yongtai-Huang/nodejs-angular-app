@@ -570,6 +570,7 @@ router.post('/:photo/photoComments', auth.required, function(req, res, next) {
       return req.photo.save().then(function(photo) {
         res.json({photoComment: photoComment.toJSONFor(user)});
       });
+      
     });
   }).catch(next);
 });
@@ -578,11 +579,13 @@ router.post('/:photo/photoComments', auth.required, function(req, res, next) {
 router.delete('/:photo/photoComments/:photoComment', auth.required, function(req, res, next) {
   if(req.photoComment.author.toString() === req.payload.id.toString()){
     req.photo.photoComments.remove(req.photoComment._id);
+
     req.photo.save()
     .then(PhotoComment.find({_id: req.photoComment._id}).remove().exec())
     .then(function(){
       return res.sendStatus(204);
     }).catch(next);
+
   } else {
     return res.sendStatus(403);
   }

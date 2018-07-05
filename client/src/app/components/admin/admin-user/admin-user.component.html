@@ -1,0 +1,51 @@
+<div class="admin-user-page">
+
+  <div class="user-info">
+    <div class="container">
+      <h4 class="page-header text-primary text-center"><strong>{{ pageTitle }}</strong></h4>
+      <app-list-errors [errors]="errors"></app-list-errors>
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let user of users; let ind=index">
+          <div class="user-box" [ngClass]="{ 'admin': user.admin, 'super-user': user.superUser}">
+            <a [routerLink]="['/profile', user.username]">
+              <div class="row">
+                <div class="col-md-3">
+                  <div *ngIf="user.image">
+                    <img src="{{avatar_url}}{{user.image}}" class="user-image mx-auto d-block" />
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <h6 *ngIf="user.username" class="text-user">
+                    User name: <strong>{{ user.username }}</strong>
+                  </h6>
+                  <h6 *ngIf="user.email" class="text-user">
+                    Email: <strong>{{ user.email }}</strong>
+                  </h6>
+                  <h6 *ngIf="user.firstname && user.lastname" class="text-user">
+                    Full name: <strong>{{ user.firstname }}&nbsp;&nbsp;{{ user.lastname }}</strong>
+                  </h6>
+                  <h6 *ngIf="user.admin" class="text-user">Administtrator: <strong class="text-danger">{{ user.admin }}</strong></h6>
+                  <!-- <h6 *ngIf="user.bio" class="text-bio"><span [innerHTML]="user.bio"></span></h6> -->
+                </div>
+              </div>
+            </a>
+
+            <!-- [hidden]="currentUser.username === user.username" -->
+            <div *ngIf="currentUser.superUser" class="admin-button text-center">
+              <button class="btn btn-sm btn-warning"
+                [ngClass]="{ 'disabled': isSubmittingToggleAdmin,
+                'btn-warning': user.admin,
+                'btn-danger': !user.admin }"
+                (click)="toggleAdmin(ind)">
+                <span *ngIf="!user.admin"><i class="fa fa-plus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+                <span *ngIf="user.admin"><i class="fa fa-minus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+                {{ user.admin ? 'Remove' : 'Add' }} admin
+              </button>
+            <div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

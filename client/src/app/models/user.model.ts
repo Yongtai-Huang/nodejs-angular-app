@@ -4,4 +4,6 @@ export class User {
   username: string;
   bio: string;
   image: string;
+  admin?: boolean;
+  superUser?: boolean;
 }

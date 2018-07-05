@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
   photoDownvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   hash: String,
-  salt: String
+  salt: String,
+  roles: [{type: String, default: ["USER"], enum: ["SUPERUSER", "ADMIN", "USER"]}],
 }, {timestamps: true});
 
 UserSchema.plugin(uniqueValidator, {message: 'is already taken.'});
@@ -40,11 +41,13 @@ UserSchema.methods.setPassword = function(password){
 UserSchema.methods.generateJWT = function() {
   let today = new Date();
   let exp = new Date(today);
-  exp.setDate(today.getDate() + 60);  //??
+  exp.setDate(today.getDate() + 60);
 
   return jwt.sign({
     id: this._id,
     username: this.username,
+    admin: this.isAdmin(),
+    superUser: this.isSuperUser(),
     exp: parseInt(exp.getTime() / 1000),
   }, secret);
 };
@@ -54,6 +57,8 @@ UserSchema.methods.toAuthJSON = function(){
   return {
     username: this.username,
     email: this.email,
+    admin: this.isAdmin(),
+    superUser: this.isSuperUser(),
     token: this.generateJWT(),
     bio: this.bio,
     image: this.image
@@ -122,6 +127,16 @@ UserSchema.methods.isFollowing = function(id){
   return this.following.some(function(followId){
     return followId.toString() === id.toString();
   });
+};
+
+// Is an administor or not
+UserSchema.methods.isAdmin = function(){
+  return this.roles.indexOf("ADMIN") > -1;
+};
+
+// Is an administor or not
+UserSchema.methods.isSuperUser = function(){
+  return this.roles.indexOf("SUPERUSER") > -1;
 };
 
 mongoose.model('User', UserSchema);
