@@ -18,9 +18,9 @@ The app has the following functionality:
 (7) Up-voting and down-voting photos.
 
 
-<a href="https://webkang.com/photos">Demo</a>
+<a href="https://www.webkang.com">Demo</a>
 
-<a href="https://webkang.com/articles">Tutorial</a>
+<a href="https://www.webkang.com">Tutorial</a>
 
 
 ## Getting Started
