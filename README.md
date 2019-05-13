@@ -1,5 +1,5 @@
 # nodejs-angular-app
-Photo-sharing app with node.js and angular 6.
+Photo-sharing app with node.js and angular 7.
 
 The app has the following functionality:
 
