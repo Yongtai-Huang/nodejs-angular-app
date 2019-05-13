@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { PhotoListConfig } from '../../../models/photo-list-config.model';
 import { Profile } from '../../../models/profile.model';
@@ -17,8 +17,7 @@ export class ProfilePhotosComponent implements OnInit {
 	};
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
@@ -28,7 +27,7 @@ export class ProfilePhotosComponent implements OnInit {
         type: 'all',
         filters: {}
       };
-      this.photosConfig.filters.takenBy = this.profile.username;
+      this.photosConfig.filters.createdBy = this.profile.username;
     });
   }
 

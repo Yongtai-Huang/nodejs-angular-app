@@ -16,7 +16,7 @@ export class PhotoCommentComponent implements OnInit, OnDestroy {
   @Input() photoComment: PhotoComment;
   @Output() deletePhotoComment = new EventEmitter<boolean>();
   canModify: boolean;
-	private subscription: Subscription;
+  private subscription: Subscription;
 
   constructor(
     private userService: UserService
@@ -24,13 +24,13 @@ export class PhotoCommentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Load the current user's data
-		this.subscription = this.userService.currentUser
+    this.subscription = this.userService.currentUser
     .subscribe( (userData: User) => {
       this.canModify = (userData.username === this.photoComment.author.username);
     });
   }
 
-	ngOnDestroy() {
+  ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 

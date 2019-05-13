@@ -17,7 +17,7 @@ export class ListErrorsComponent implements OnInit {
       this.formattedErrors = Object.keys(errorList.errors || {})
       .map(key => `${key} ${errorList.errors[key]}`);
     }
-  };
+  }
 
   constructor() { }
 

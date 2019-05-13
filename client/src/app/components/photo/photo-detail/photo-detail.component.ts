@@ -54,7 +54,7 @@ export class PhotoDetailComponent implements OnInit {
     this.route.data
     .subscribe( (data: { photo: Photo }) => {
       this.photo = data.photo;
-      this.profile = data.photo.takenBy;  //Added by hyt
+      this.profile = data.photo.createdBy;  //Added by hyt
       // Load the pphotoComments on this photo
       this.populatePhotoComments();
     });
@@ -64,7 +64,7 @@ export class PhotoDetailComponent implements OnInit {
     .subscribe( (userData: User) => {
       this.currentUser = userData;
 
-      this.canModify = (this.currentUser.username === this.photo.takenBy.username);
+      this.canModify = (this.currentUser.username === this.photo.createdBy.username);
     });
 
     this.userService.isAuthenticated.subscribe( (authenticated) => {
@@ -164,7 +164,7 @@ export class PhotoDetailComponent implements OnInit {
   deletePhoto() {
     this.isDeleting = true;
 
-    this.photosService.destroy(this.photo.slug).subscribe( success => {
+    this.photosService.destroy(this.photo.slug).subscribe( () => {
       this.router.navigateByUrl('/');
     });
   }
@@ -192,9 +192,9 @@ export class PhotoDetailComponent implements OnInit {
     });
   }
 
-  onDeletePhotoComment(comment) {
+  onDeletePhotoComment(comment: PhotoComment) {
     this.photoCommentsService.destroy(comment.id, this.photo.slug)
-    .subscribe( success => {
+    .subscribe( () => {
       this.photoComments = this.photoComments.filter((item) => item !== comment);
     });
   }

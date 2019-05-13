@@ -12,7 +12,7 @@ export class PhotoTagsService {
   ) { }
 
   getAll(): Observable<[string]> {
-    return this.apiService.get('/photoTags')  //??
+    return this.apiService.get('/photoTags')
     .pipe(map(data => data.tags));
   }
 

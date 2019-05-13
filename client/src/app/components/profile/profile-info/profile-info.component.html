@@ -1,0 +1,4 @@
+<div class="container">
+  <div *ngIf="profile.bio" class="pt-2" [innerHTML]="profile.bio | markdown"></div>
+  <p *ngIf="!profile.bio" class="text-muted"> No biography yet.</p>
+</div>

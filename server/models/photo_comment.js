@@ -14,7 +14,8 @@ PhotoCommentSchema.methods.toJSONFor = function(user){
     id: this._id,
     body: this.body,
     createdAt: this.createdAt,
-    author: this.author.toProfileJSONFor(user)  // Profile of the author
+    // Profile of the comment author
+    author: this.author.toProfileJSONFor(user)
   };
 };
 

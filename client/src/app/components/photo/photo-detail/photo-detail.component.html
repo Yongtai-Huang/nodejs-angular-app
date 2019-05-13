@@ -19,13 +19,13 @@
   <div class="banner">
     <div class="row">
       <div class="col-md-7">
-        <a *ngIf="photo.takenBy.image" [routerLink]="['/profile', photo.takenBy.username]">
-          <img src="{{avatar_url}}{{photo.takenBy.image}}" class="photo-takenBy-img" />
+        <a *ngIf="photo.createdBy.image" [routerLink]="['/profile', photo.createdBy.username, 'profile-photos']">
+          <img src="{{avatar_url}}{{photo.createdBy.image}}" class="photo-createdBy-img" />
         </a>
         <div class="info">
-          <a class="takenBy text-primary"
-            [routerLink]="['/profile', photo.takenBy.username]">
-            <strong>{{ photo.takenBy.username }}</strong>
+          <a class="createdBy text-primary"
+            [routerLink]="['/profile', photo.createdBy.username]">
+            <strong>{{ photo.createdBy.username }}</strong>
           </a>
           <span class="date text-muted">
             &nbsp;&nbsp;{{ photo.createdAt | date: 'short' }}
@@ -46,9 +46,8 @@
           </button>
         </span>
 
-        <span [hidden]="canModify" class="text-right">
-          <button
-            class="btn btn-sm"
+        <span class="text-right">
+          <button *ngIf="!canModify" class="btn btn-sm"
             [hidden]="!isAuthenticated"
             [ngClass]="{ 'disabled': isSubmittingFollow,
                          'btn-light': profile.following }"
@@ -58,21 +57,21 @@
             {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.username }}
           </button>
 
-          <button class="btn btn-sm"
-           [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote,
-                        'btn-light': photo.upvoted }"
-           (click)="toggleUpvote()">
-            <i class="fa fa-thumbs-o-up fa-lg text-secondary" aria-hidden="true"></i>
-            <span *ngIf="photo.upvotesCount > 0">
-              &nbsp;{{ photo.upvotesCount }}
-            </span>
+          <button class="no-button"
+            [disabled]= "!currentUser.username || isSubmittingVote || canModify"
+             [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote }"
+             (click)="toggleUpvote()">
+             <i class="fa" [ngClass]="{'fa-thumbs-up': photo.upvoted, 'fa-thumbs-o-up': !photo.upvoted}" aria-hidden="true"></i>
+             <span *ngIf="photo.upvotesCount > 0">
+                &nbsp;{{ photo.upvotesCount }}
+             </span>
           </button>
 
-          <button class="btn btn-sm"
-           [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote,
-                        'btn-light': photo.downvoted }"
-           (click)="toggleDownvote()">
-            <i class="fa fa-thumbs-o-down fa-lg text-secondary" aria-hidden="true"></i>
+          <button class="no-button"
+            [disabled]= "!currentUser.username || isSubmittingVote || canModify"
+            [ngClass]="{ 'disabled': !isAuthenticated || isSubmittingVote }"
+            (click)="toggleDownvote()">
+            <i class="fa" [ngClass]="{'fa-thumbs-down': photo.downvoted, 'fa-thumbs-o-down': !photo.downvoted}" aria-hidden="true"></i>
             <span *ngIf="photo.downvotesCount > 0">
               &nbsp;{{ photo.downvotesCount }}
             </span>
@@ -83,7 +82,7 @@
   </div>
   <hr>
 
-  <div class="row">
+  <div class="row comment-block">
     <div class="col-xs-12 col-md-12">
       <div *appShowAuthed="true">
 
@@ -109,9 +108,9 @@
       </div>
 
       <div *appShowAuthed="false">
-        <a [routerLink]="['/login']">Sign in</a> or
-        <a [routerLink]="['/register']">sign up</a>
-        to add comments on this photo.
+        <a [routerLink]="['/login']"><span class="text-success">Sign in</span></a> or
+        <a [routerLink]="['/register']"><span class="text-success">sign up</span></a>
+        to add comments.
       </div>
       <hr />
 

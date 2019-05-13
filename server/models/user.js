@@ -20,9 +20,10 @@ const UserSchema = new mongoose.Schema({
   photoUpvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
   photoDownvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  followersCount: {type: Number, min: 0, default: 0},
   hash: String,
   salt: String,
-  roles: [{type: String, default: ["USER"], enum: ["SUPERUSER", "ADMIN", "USER"]}],
+  roles: [{type: String, default: ["USER"], enum: ["SUPERADMIN", "ADMIN", "USER"]}],
 }, {timestamps: true});
 
 UserSchema.plugin(uniqueValidator, {message: 'is already taken.'});
@@ -41,13 +42,13 @@ UserSchema.methods.setPassword = function(password){
 UserSchema.methods.generateJWT = function() {
   let today = new Date();
   let exp = new Date(today);
-  exp.setDate(today.getDate() + 60);
+  exp.setDate(today.getDate() + 60);  // ?? To change
 
   return jwt.sign({
     id: this._id,
     username: this.username,
     admin: this.isAdmin(),
-    superUser: this.isSuperUser(),
+    superAdmin: this.isSuperAdmin(),
     exp: parseInt(exp.getTime() / 1000),
   }, secret);
 };
@@ -56,9 +57,11 @@ UserSchema.methods.generateJWT = function() {
 UserSchema.methods.toAuthJSON = function(){
   return {
     username: this.username,
+    firstname: this.firstname,
+    lastname: this.lastname,
     email: this.email,
     admin: this.isAdmin(),
-    superUser: this.isSuperUser(),
+    superAdmin: this.isSuperAdmin(),
     token: this.generateJWT(),
     bio: this.bio,
     image: this.image
@@ -73,8 +76,13 @@ UserSchema.methods.toProfileJSONFor = function(user){
     firstname: this.firstname,
     lastname: this.lastname,
     bio: this.bio,
-    image: this.image,  // || 'smiley-cyrus.jpg', //?? hyt
-    following: user ? user.isFollowing(this._id) : false  // the "user" is following "this" user or not
+    image: this.image,
+    // the "user" is following "this" user or not
+    following: user ? user.isFollowing(this._id) : false,
+    // is your profile or other user's
+    yourself: user ? user._id.toString() === this._id.toString() : false,
+    followersCount: this.followersCount,
+    createdAt: this.createdAt
   };
 };
 
@@ -106,7 +114,7 @@ UserSchema.methods.isPhotoDownvote = function(id){
   });
 };
 
-// Follow the user (id: user._id) or not
+// Follow the user (id: user._id)
 UserSchema.methods.follow = function(id){
   if(this.following.indexOf(id) === -1){
     this.following.push(id);
@@ -114,7 +122,7 @@ UserSchema.methods.follow = function(id){
   return this.save();
 };
 
-// Unfollow the user (id: user._id) or not
+// Unfollow the user (id: user._id)
 UserSchema.methods.unfollow = function(id){
   if(this.following.indexOf(id) > -1){
     this.following.remove(id);
@@ -134,9 +142,9 @@ UserSchema.methods.isAdmin = function(){
   return this.roles.indexOf("ADMIN") > -1;
 };
 
-// Is an administor or not
-UserSchema.methods.isSuperUser = function(){
-  return this.roles.indexOf("SUPERUSER") > -1;
+// Is a super administor or not
+UserSchema.methods.isSuperAdmin = function(){
+  return this.roles.indexOf("SUPERADMIN") > -1;
 };
 
 mongoose.model('User', UserSchema);

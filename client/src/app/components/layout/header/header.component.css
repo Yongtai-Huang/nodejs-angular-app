@@ -1,9 +1,10 @@
 nav {
-  background-color: #1289A7!important;
+  background-color: #F9F9F9!important;
 }
+
 .navbar-brand {
   font-size: 20px;
-  color: orange;
+  color: #333;
   margin-left: 1em!important;
 }
 

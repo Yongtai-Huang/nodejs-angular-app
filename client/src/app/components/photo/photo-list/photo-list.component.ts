@@ -32,7 +32,7 @@ export class PhotoListComponent implements OnInit {
   ngOnInit() {
   }
 
-  setPageTo(pageNumber) {
+  setPageTo(pageNumber: number) {
     this.currentPage = pageNumber;
     this.runQuery();
   }
@@ -54,7 +54,10 @@ export class PhotoListComponent implements OnInit {
       this.loading = false;
       this.photos = data.photos;
 
-      this.totalPages = Array.from(new Array(Math.ceil(data.photosCount / this.limit)), (val, index) => index + 1);
+      this.totalPages = [];
+      for (let i = 0; i < Math.ceil(data.photosCount / this.limit); i++) {
+        this.totalPages.push(i + 1);
+      }
     });
   }
 

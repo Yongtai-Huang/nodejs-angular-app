@@ -5,5 +5,5 @@ export class User {
   bio: string;
   image: string;
   admin?: boolean;
-  superUser?: boolean;
+  superAdmin?: boolean;
 }

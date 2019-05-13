@@ -30,10 +30,10 @@ if (!isProduction) {
 
 if(isProduction){
   //mongoose.connect(process.env.MONGODB_URI);
-  mongoose.connect('mongodb://localhost/photoapp');
+  mongoose.connect('mongodb://localhost/photoapp', { useNewUrlParser: true });
   mongoose.set('debug', !isProduction);
 } else {
-  mongoose.connect('mongodb://localhost/photoapp');
+  mongoose.connect('mongodb://localhost/photoapp', { useNewUrlParser: true });
   mongoose.set('debug', true);
 }
 

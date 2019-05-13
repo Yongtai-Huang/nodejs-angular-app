@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
@@ -23,8 +23,12 @@ export class PhotoEditComponent implements OnInit {
   isSubmitting = false;
   isFileSelected = false; // Requied to select a photo, for validation
 
-  uploadFile: File;
+  // uploadFile: File;
   formData: FormData = new FormData();
+  fileList: FileList;
+  wrongFileType = false;
+  sizeLimit = 5;  // MB
+  fileTooLarge = false;
 
   constructor(
     private title: Title,
@@ -47,7 +51,7 @@ export class PhotoEditComponent implements OnInit {
     this.route.data.subscribe( (data: {photo: Photo}) => {
       if (data.photo) {
         this.photo = data.photo;
-        this.pageTitle = "Update Photo";
+        this.pageTitle = 'Update Photo';
         this.photoForm.patchValue(data.photo);
       }
     });
@@ -70,32 +74,52 @@ export class PhotoEditComponent implements OnInit {
     this.photo.tagList = this.photo.tagList.filter((tag) => tag !== tagName);
   }
 
-  fileChange(event) {
-    let fileList: FileList = event.target.files;
-    if (fileList.length > 0) {
+  fileChange(event: any) {
+    this.fileList = event.target.files;
+
+    this.fileTooLarge = false;
+    this.wrongFileType = false;
+    const file: File = this.fileList[0];
+
+    if (file.size/Math.pow(1024, 2) > this.sizeLimit) {
+      this.fileTooLarge = true;
+      return;
+    }
+
+    const ind = ['jpg', 'jpeg', 'png', 'gif'].indexOf(file.type.split('/')[1]);
+    // Client-side validation example
+    if (file.type.split('/')[0] !== 'image' || ind < 0) {
+      this.wrongFileType = true;
+      return;
+    }
+
+    if (this.fileList.length > 0) {
       this.isFileSelected = true;
-      let file: File = fileList[0];
-      let formData: FormData = new FormData();
-      formData.append('uploadFile', file, file.name);
-      this.formData = formData;
     }
   }
 
   // Submit form
-  submitForm(value) {
+  submitForm(value: any) {
     this.errors = {errors: {}};
 
     if (!this.isFileSelected && !this.photo.image) {
-      this.errors = {errors: {'Error: ': 'You must select a image file.'}}; //??
-      return; //??
+      this.errors = {errors: {'Error: ': 'You must select a image file.'}};
+      return;
     }
 
     this.isSubmitting = true;
-    this.addTag();   //In case not press Enter
+    this.addTag();   // In case not press Enter
+
+    if (this.fileList && this.fileList.length > 0) {
+      const file: File = this.fileList[0];
+      const formData: FormData = new FormData();
+      formData.append('uploadFile', file, file.name);
+      this.formData = formData;
+    }
 
     if (this.formData === null) {
       if (value.title) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('title', value.title);
         this.formData = formData;
       }
@@ -107,7 +131,7 @@ export class PhotoEditComponent implements OnInit {
 
     if (this.formData === null) {
       if (value.description) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('description', value.description);
         this.formData = formData;
       }
@@ -119,7 +143,7 @@ export class PhotoEditComponent implements OnInit {
 
     if (this.formData === null) {
       if (value.takenAt) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('takenAt', value.takenAt);
         this.formData = formData;
       }
@@ -131,7 +155,7 @@ export class PhotoEditComponent implements OnInit {
 
     if (this.formData === null) {
       if (value.takenBy) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('takenBy', value.takenBy);
         this.formData = formData;
       }
@@ -143,7 +167,7 @@ export class PhotoEditComponent implements OnInit {
 
     if (this.formData === null) {
       if (this.photo.tagList.length > 0) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('tagList', JSON.stringify(this.photo.tagList));
         this.formData = formData;
       }
@@ -156,7 +180,7 @@ export class PhotoEditComponent implements OnInit {
     // Update photo
     if (this.formData === null) {
       if (this.photo.slug) {
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('slug', this.photo.slug);
         this.formData = formData;
       }
@@ -174,16 +198,19 @@ export class PhotoEditComponent implements OnInit {
       this.isSubmitting = false;
       this.isFileSelected = false;
       this.formData = null;
+      this.fileList = null;
     }, (err) => {
       this.errors = err.error;
       this.isSubmitting = false;
       this.isFileSelected = false;
       this.formData = null;
+      this.fileList = null;
     });
   }
 
   cancel() {
     this.formData = null;
+    this.fileList = null;
     if (this.photo.slug) {
       this.router.navigateByUrl('/photo/'+ this.photo.slug);
     } else {

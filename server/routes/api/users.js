@@ -9,30 +9,33 @@ const multer  = require('multer');
 const fs = require('fs');
 const path = require('path');
 
-// Set the storage
+const avatarFileSizeLimit = Math.pow(1024, 2);  // 1 MB
+
+// Set the storage for avatar files
+const avatar_dir = path.join(__dirname, '../..', 'public/upload', 'avatars');
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../..','public/upload', 'avatars')
+  destination: avatar_dir
 });
 
 // Init Upload
 const upload = multer({
   storage: storage,
-  limits: {fileSize: 1000000},
-  fileFilter: function(req, file, cb){
+  limits: {fileSize: avatarFileSizeLimit},
+  fileFilter: function(req, file, cb) {
     checkFileType(file, cb);
   }
 }).single('uploadFile');
 
 // Check File Type
-function checkFileType(file, cb){
+function checkFileType(file, cb) {
   // Allowed ext
-let filetypes = /jpeg|jpg|png|gif/;
+  let filetypes = /jpeg|jpg|png|gif/;
   // Check ext
-let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   // Check mime
-let mimetype = filetypes.test(file.mimetype);
+  let mimetype = filetypes.test(file.mimetype);
 
-  if(mimetype && extname){
+  if (mimetype && extname) {
     return cb(null, true);
   } else {
     let err = new Error();
@@ -41,47 +44,69 @@ let mimetype = filetypes.test(file.mimetype);
   }
 }
 
+// Rename avatar file
+function renameAvatarFile(file) {
+  return new Promise(function(resolve, reject) {
+    let filename = "ava" + "-" + (new Date).valueOf() + "-" + file.originalname;
+    fs.rename(file.path, path.join(avatar_dir, filename), function(err) {
+      if (err) reject(err)
+      resolve(filename);
+    });
+  });
+}
+
+// Remove an avatar file
+function removeAvatarFile(filename) {
+  return new Promise(function(resolve, reject) {
+    fs.unlink(path.join(avatar_dir, filename), function(err) {
+      if (err && err.code == 'ENOENT') {
+        console.info("File doesn't exist, won't remove it.");
+        reject(err);
+      } else if (err) {
+        console.error("Error occurred while trying to remove image file");
+        reject(err);
+      }
+      console.info(`previous image file removed`);
+      resolve();
+    });
+  });
+}
+
 // Get all users
-router.get('/', auth.adminSuperUser, function(req, res, next) {
-  User.find().then(function(users){
+router.get('/', auth.adminSuperAdmin, function(req, res, next) {
+  User.find().then(function(users) {
     return res.json({
-      users: users.map(function(user){
+      users: users.map(function(user) {
         return user.toAuthJSON();
       })
     });
   }).catch(next);
 });
 
-// Add user's admin role
-router.post('/admin/:username', auth.superUser, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if(!user || !user.roles.indexOf('SUPERUSER') < 0){ res.sendStatus(401); }
+// Super admin can add admin roles to users
+router.post('/admin/:username', auth.superAdmin, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user) {
+    if (!user || !user.roles.indexOf('SUPERADMIN') < 0) { res.sendStatus(401); }
 
-    User.findOne({username: req.params.username}).then(function(userData){
-      if(!userData){ res.sendStatus(404); }
-      // Cannot remove the user's admin role himself
-      //if(!userData || userData.username === user.username){ res.sendStatus(404); }
+    return User.findOne({username: req.params.username}).then(function(userData) {
+      if (!userData) { res.sendStatus(404); }
 
       userData.roles.push('ADMIN');
-      //userData.roles.push('SUPERUSER');
 
       userData.save().then( function(usr) {
         res.json({usr: usr.toAuthJSON()});
       });
-
-    })
+    });
   }).catch(next);
 });
 
-// Remove user's admin role
-router.delete('/admin/:username', auth.superUser, function(req, res, next) {
-  User.findById(req.payload.id).then(function(user){
-    if(!user || !user.roles.indexOf('SUPERUSER') < 0){ res.sendStatus(401); }
+// Super admin can remove user's admin roles
+router.delete('/admin/:username', auth.superAdmin, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user) {
+    if (!user || !user.roles.indexOf('SUPERADMIN') < 0) { res.sendStatus(401); }
 
-    User.findOne({username: req.params.username}).then(function(userData){
-      if(!userData){ res.sendStatus(404); }
-      // Cannot remove the user's admin role himself
-      //if(!userData || userData.username === user.username){ res.sendStatus(404); }
+    return User.findOne({username: req.params.username}).then(function(userData) {
+      if (!userData) { res.sendStatus(404); }
 
       let ind = userData.roles.indexOf('ADMIN');
       userData.roles.splice(ind, 1);
@@ -94,10 +119,10 @@ router.delete('/admin/:username', auth.superUser, function(req, res, next) {
   }).catch(next);
 });
 
-// Get user
-router.get('/user', auth.required, function(req, res, next){
-  User.findById(req.payload.id).then(function(user){
-    if(!user){ res.sendStatus(401); }
+// Get one user
+router.get('/user', auth.required, function(req, res, next) {
+  User.findById(req.payload.id).then(function(user) {
+    if (!user) { res.sendStatus(401); }
 
     res.json({user: user.toAuthJSON()});
   }).catch(next);
@@ -106,6 +131,7 @@ router.get('/user', auth.required, function(req, res, next){
 // Create new user
 router.post('/users', function(req, res, next) {
   upload(req, res, function(err) {
+    // Handle err in uploading avatar file
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         //console.log('File size is too large. Max limit is 1 MB.');
@@ -117,70 +143,64 @@ router.post('/users', function(req, res, next) {
         //console.log('Fail to submit');
         return res.status(422).json({errors: {Err: "to submit."}});
       }
-    } else {
-      // Change the name of the uploaded file and move the file to the directory /public/upload/avatars
-      let filename = '';
-      if (req.file) {
-        let file = req.file;
-        filename = "ava" + (new Date).valueOf() + "-" + file.originalname;
-        fs.rename(file.path, path.join(__dirname, '../..', 'public/upload', 'avatars', filename), function (err) {
-          if (err) throw err;
-        });
-      }
+    }
 
-      if (!req.body.password || !req.body.username || !req.body.email) {
-        return res.status(422).json({errors: {'Requirement error': "Username, password or email cannot be blank."}});
-      }
+    if (!req.body.password || !req.body.username || !req.body.email) {
+      return res.status(422).json({errors: {'Requirement error': "Username, password or email cannot be blank."}});
+    }
 
+    // Rename avatar file
+    return Promise.resolve(req.file ? renameAvatarFile(req.file) : null)
+    .then(function(filename) {
       // Find the user by email ang username to ensure email ang username are unique
       return Promise.all([
         User.find({email: req.body.email}),
         User.find({username: req.body.username})
-      ]).then(function(results){
-        if(results[0].length > 0) {
+      ]).then(function(results) {
+        if (results[0].length > 0) {
           return res.status(422).json({errors: {'Duplicated email error': "This email has been taken. Try 'Sign in' and 'Forgot password?' if it is your email."}});
-        } else if (results[1].length > 0) {
+        }
+
+        if (results[1].length > 0) {
           // If same username has been taken, generate random string and recommend new username
           // Pay attention: the uniqueness of the suggested username is not guaranteed
           let num = randomstring.generate({
-            length: 2,    //??
+            length: 2,
             charset: 'numeric'
           });
           let newUsername = req.body.username + num;
           return res.status(422).json({errors: {'Duplicated username': "This username has been taken. Try: " + newUsername}});
-        } else {
-
-          let user = new User();
-          user.username = req.body.username;
-          user.email = req.body.email;
-          user.setPassword(req.body.password);
-
-          if (req.body.firstname) {
-            user.firstname = req.body.firstname;
-          }
-
-          if (req.body.lastname) {
-            user.lastname = req.body.lastname;
-          }
-
-          if (filename) {
-            user.image = filename;
-          }
-
-          user.save().then( function(userData) {
-            res.json({user: userData.toAuthJSON()});
-          });
-
         }
-      }).catch(next);
-    }
-  });
 
+        let user = new User();
+        user.username = req.body.username;
+        user.email = req.body.email;
+        user.setPassword(req.body.password);
+
+        if (req.body.firstname) {
+          user.firstname = req.body.firstname;
+        }
+
+        if (req.body.lastname) {
+          user.lastname = req.body.lastname;
+        }
+
+        if (filename) {
+          user.image = filename;
+        }
+
+        return user.save().then( function(userData) {
+          res.json({user: userData.toAuthJSON()});
+        });
+      });
+    }).catch(next);
+  });
 });
 
 // Update user
 router.put('/user', auth.required, function(req, res, next) {
   upload(req, res, function(err) {
+    // Handle error in avatar file upload
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         //console.log('File size is too large. Max limit is 1MB.');
@@ -192,110 +212,87 @@ router.put('/user', auth.required, function(req, res, next) {
         //console.log('Fail to submit');
         return res.status(422).json({errors: {'Submit error': "Fail to submit."}});
       }
-    } else {
-      User.findById(req.payload.id).then(function(user) {
-        if(!user){ return res.sendStatus(401); }
+    }
 
-        // If new avatar file is uploaded or req.body.removeAvatar is true
-        // get the path of the previous file
-        let filePath = '';
-        if ((user.image && req.file) || (req.body.removeAvatar === 'true')) {
-          filePath = path.join(__dirname, '../..', 'public/upload', 'avatars', user.image);
-        }
+    User.findById(req.payload.id).then(function(user) {
+      if (!user) { return res.sendStatus(401); }
 
-        // Change the name of the uploaded file and move the file to the directory /public/upload/avatars
-        let filename = '';
-        if (req.file) {
-          let file = req.file;
-          filename = "a" + (new Date).valueOf() + "-" + file.originalname;
-          fs.rename(file.path, path.join(__dirname, '../..', 'public/upload', 'avatars', filename), function (err) {
-            if (err) throw err;
-          });
+      // Remove avatar file
+      if (req.body.removeAvatar === 'true') {
+        user.image = '';
+      }
+
+      return Promise.all([
+        req.file ? renameAvatarFile(req.file) : null,
+        (req.body.removeAvatar || req.file) && user.image ? removeAvatarFile(user.image) : null
+      ]).then(function(results) {
+        let filename = results[0];
+
+        if (filename) {
+          user.image = filename;
         }
 
         // Only update fields that were actually passed
-        if(typeof req.body.username !== 'undefined'){
+        if (typeof req.body.username !== 'undefined') {
           user.username = req.body.username;
         }
-        if(typeof req.body.firstname !== 'undefined'){
+
+        if (typeof req.body.firstname !== 'undefined') {
           user.firstname = req.body.firstname;
         }
-        if(typeof req.body.lastname !== 'undefined'){
+
+        if (typeof req.body.lastname !== 'undefined') {
           user.lastname = req.body.lastname;
         }
-        if(typeof req.body.email !== 'undefined'){
+
+        if (typeof req.body.email !== 'undefined') {
           user.email = req.body.email;
         }
-        if(typeof req.body.bio !== 'undefined'){
+
+        if (typeof req.body.bio !== 'undefined') {
           user.bio = req.body.bio;
         } else {
           user.bio = '';
         }
 
-        if(req.body.removeAvatar === 'true'){
-          user.image = '';
-        }
-
-        if(filename){
-          user.image = filename;
-        }
-
-        if(req.body.password){
+        if (req.body.password) {
           user.setPassword(req.body.password);
         }
 
         // Save the change
-        user.save().then( function(userData) {
-          // remove previous file
-          if ((filePath && filename) || (req.body.removeAvatar === 'true')) {
-            fs.unlink(filePath, function(err) {
-              if(err && err.code == 'ENOENT') {
-                // File doens't exist
-                console.info("File does not exist, will not remove it.");
-              } else if (err) {
-                // Other errors, e.g. maybe we don't have enough permission
-                console.error("Error occurred while trying to remove avatar file");
-              } else {
-                console.info(`previous avatar file removed`);
-              }
-            });
-          }
-
+        return user.save().then( function(userData) {
           res.json({user: userData.toAuthJSON()});
         });
-      }).catch(next);
-    }
+      });
+    }).catch(next);
   });
 });
 
 // login
 router.post('/users/login', function(req, res, next) {
   upload(req, res, function(err) {
-    if (err) {
-      //console.log('Fail to login');
+    if (err)  {
       return res.status(422).json({errors: {'Login error': "Fail to login"}});
-    } else {
-
-      if(!req.body.email) {
-        return res.status(422).json({errors: {'Blank email error': "Email can't be blank"}});
-      }
-
-      if(!req.body.password) {
-        return res.status(422).json({errors: {'Password missed error': "Password can't be blank"}});
-      }
-
-      passport.authenticate('local', {session: false}, function(err, user, info) {
-        if(err){ return next(err); }
-
-        if(user){
-          user.token = user.generateJWT();
-          return res.json({user: user.toAuthJSON()});
-        } else {
-          return res.status(422).json(info);
-        }
-      })(req, res, next);
-
     }
+
+    if (!req.body.email) {
+      return res.status(422).json({errors: {'Blank email error': "Email can't be blank"}});
+    }
+
+    if (!req.body.password) {
+      return res.status(422).json({errors: {'Password missed error': "Password can't be blank"}});
+    }
+
+    passport.authenticate('local', {session: false}, function(err, user, info) {
+      if (err) { return next(err); }
+
+      if (user) {
+        user.token = user.generateJWT();
+        return res.json({user: user.toAuthJSON()});
+      } else {
+        return res.status(422).json(info);
+      }
+    })(req, res, next);
   });
 });
 

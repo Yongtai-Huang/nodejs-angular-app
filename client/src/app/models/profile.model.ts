@@ -5,4 +5,7 @@ export class Profile {
   bio: string;
   image: string;
   following: boolean;
+  yourself: boolean;
+  createdAt?: string;
+  followersCount?: number;
 }

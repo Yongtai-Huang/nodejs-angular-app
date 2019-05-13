@@ -53,23 +53,23 @@ export class AuthComponent implements OnInit {
     this.title.setTitle(this.pageTitle);
   }
 
-  fileChange(event) {
-    let fileList: FileList = event.target.files;
+  fileChange(event: any) {
+    const fileList: FileList = event.target.files;
     if (fileList.length > 0) {
-      let file: File = fileList[0];
-      let formData: FormData = new FormData();
+      const file: File = fileList[0];
+      const formData: FormData = new FormData();
       formData.append('uploadFile', file, file.name);
       this.formData = formData;
     }
   }
 
-  submitForm(value) {
+  submitForm(value: any) {
     this.isSubmitting = true;
     this.errors = {errors: {}};
 
      // No uploadfile
     if (this.formData === null) {
-      let formData: FormData = new FormData();
+      const formData: FormData = new FormData();
       formData.append('email', value.email.trim());
       formData.append('password', value.password.trim());
       this.formData = formData;
@@ -91,7 +91,7 @@ export class AuthComponent implements OnInit {
     }
 
     this.userService.attemptAuth(this.authType, this.formData)
-    .subscribe(  (data) => {
+    .subscribe( () => {
       this.formData = null;
       this.isSubmitting = false;
       this.router.navigateByUrl('/');

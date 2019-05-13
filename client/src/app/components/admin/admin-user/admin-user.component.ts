@@ -16,7 +16,7 @@ export class AdminUserComponent implements OnInit {
   avatar_url = environment.avatar_url;
   currentUser: User;
   users: User[];
-  isSubmittingToggleAdmin: boolean = false;
+  isSubmittingToggleAdmin = false;
   errors: Errors = new Errors();
 
   constructor(
@@ -33,13 +33,11 @@ export class AdminUserComponent implements OnInit {
 
     this.userService.getUsers().subscribe( data => {
       this.users = data;
-      //console.log(this.users);
     });
   }
 
   toggleAdmin(ind: number) {
-    //if (this.currentUser.username === this.users[ind].username) {
-    if (!this.currentUser.superUser) {
+    if (!this.currentUser.superAdmin) {
       return;
     }
 
@@ -49,7 +47,6 @@ export class AdminUserComponent implements OnInit {
     if (this.users[ind].admin) {
       this.userService.removeAdmin(this.users[ind].username)
       .subscribe( data => {
-        //console.log(data);
         this.users[ind] = data;
         this.isSubmittingToggleAdmin = false;
       }, (err) => {
@@ -60,7 +57,6 @@ export class AdminUserComponent implements OnInit {
     } else {
       this.userService.addAdmin(this.users[ind].username)
       .subscribe( data => {
-        //console.log(data);
         this.users[ind] = data;
         this.isSubmittingToggleAdmin = false;
       }, (err) => {

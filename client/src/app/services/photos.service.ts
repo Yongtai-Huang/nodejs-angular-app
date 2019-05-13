@@ -26,12 +26,12 @@ export class PhotosService {
     .get('/photos' + ((config.type === 'feed') ? '/feed' : ''), new HttpParams({ fromObject: params }));
   }
 
-  get(slug): Observable<Photo> {
+  get(slug: string): Observable<Photo> {
     return this.apiService.get('/photos/' + slug)
     .pipe(map(data => data.photo));
   }
 
-  destroy(slug) {
+  destroy(slug: string) {
     return this.apiService.delete('/photos/' + slug);
   }
 
@@ -49,22 +49,22 @@ export class PhotosService {
   }
 
   // upvote the photo
-  upvote(slug): Observable<Photo> {
+  upvote(slug: string): Observable<Photo> {
     return this.apiService.post('/photos/' + slug + '/upvote');
   }
 
   // cancel upvote
-  unupvote(slug): Observable<Photo> {
+  unupvote(slug: string): Observable<Photo> {
     return this.apiService.delete('/photos/' + slug + '/upvote');
   }
 
   // downvote
-  downvote(slug): Observable<Photo> {
+  downvote(slug: string): Observable<Photo> {
     return this.apiService.post('/photos/' + slug + '/downvote');
   }
 
   // cancel downvote
-  undownvote(slug): Observable<Photo> {
+  undownvote(slug: string): Observable<Photo> {
     return this.apiService.delete('/photos/' + slug + '/downvote');
   }
 

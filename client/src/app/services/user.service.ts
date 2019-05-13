@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { ReplaySubject } from 'rxjs';
-import { map, catchError, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 
 import { ApiService } from './api.service';
 import { JwtService } from './jwt.service';
@@ -23,8 +23,8 @@ export class UserService {
   public isAdmin = this.isAdminSubject.asObservable();
 
   // Super user
-  private isSuperUserSubject = new ReplaySubject<boolean>(1);
-  public isSuperUser = this.isSuperUserSubject.asObservable();
+  private isSuperAdminSubject = new ReplaySubject<boolean>(1);
+  public isSuperAdmin = this.isSuperAdminSubject.asObservable();
 
   constructor (
     private apiService: ApiService,
@@ -37,7 +37,7 @@ export class UserService {
     // If JWT detected, attempt to get & store user's info
     if (this.jwtService.getToken()) {
       this.apiService.get('/user')
-      .subscribe( data => this.setAuth(data.user), err => this.purgeAuth() );
+      .subscribe( data => this.setAuth(data.user), () => this.purgeAuth() );
     } else {
       // Remove any potential remnants of previous auth states
       this.purgeAuth();
@@ -59,11 +59,11 @@ export class UserService {
       this.isAdminSubject.next(false);
     }
 
-    if (user.superUser) {
-      // Set superUser
-      this.isSuperUserSubject.next(true);
+    if (user.superAdmin) {
+      // Set superAdmin
+      this.isSuperAdminSubject.next(true);
     } else {
-      this.isSuperUserSubject.next(false);
+      this.isSuperAdminSubject.next(false);
     }
   }
 
@@ -76,11 +76,11 @@ export class UserService {
     this.isAuthenticatedSubject.next(false);
     //Set admin to false
     this.isAdminSubject.next(false);
-    //Set superUser to false
-    this.isSuperUserSubject.next(false);
+    //Set superAdmin to false
+    this.isSuperAdminSubject.next(false);
   }
 
-  attemptAuth(type, credentials): Observable<User> {
+  attemptAuth(type: string, credentials: FormData): Observable<User> {
     const route = (type === 'login') ? '/login' : '';
     return this.apiService.post('/users' + route, credentials )
     .pipe(map( (data) => {
@@ -103,7 +103,7 @@ export class UserService {
   }
 
 	// Add admin role to user
-  addAdmin(username): Observable<User> {
+  addAdmin(username: string): Observable<User> {
     return this.apiService
     .post('/admin/' + username)
     .pipe(map(data => {
@@ -112,7 +112,7 @@ export class UserService {
   }
 
 	// Remove admin role from user
-  removeAdmin(username): Observable<User> {
+  removeAdmin(username: string): Observable<User> {
     return this.apiService
     .delete('/admin/' + username)
     .pipe(map(data => {
@@ -121,7 +121,7 @@ export class UserService {
   }
 
   // update the user on the server (email, pass, etc)
-  update(user): Observable<User> {
+  update(user: FormData): Observable<User> {
     return this.apiService
     .put('/user', user)
     .pipe(map(data => {

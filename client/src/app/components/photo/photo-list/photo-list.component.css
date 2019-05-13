@@ -1,7 +1,18 @@
-.pagination {
-  margin-top: 2em;
-}
-
 .pagination li a:hover {
   background-color: #ddffdd;
+}
+
+.page-item a {
+  border: none;
+  background: white;
+  font-size: .875rem;
+  color: #333;
+}
+
+.current-page {
+  color: red !important;
+}
+
+a {
+  cursor: pointer;
 }

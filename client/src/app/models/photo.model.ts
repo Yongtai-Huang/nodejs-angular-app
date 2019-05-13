@@ -2,8 +2,8 @@ import { Profile } from './profile.model';
 
 export class Photo {
   slug: string;
-  title: string = '';
-  description: string = '';
+  title: string;
+  description: string;
   tagList: Array<string> = [];
   takenAt: string;
   createdAt: string;
@@ -12,6 +12,6 @@ export class Photo {
   downvoted: boolean;
   upvotesCount: number;
   downvotesCount: number;
-  takenBy: Profile;
+  createdBy: Profile;
   image: string;
 }

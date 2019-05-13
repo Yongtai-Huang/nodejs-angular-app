@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
@@ -17,21 +17,19 @@ export class EditablePhotoResolverService implements Resolve<Photo> {
   ) { }
 
   resolve(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    route: ActivatedRouteSnapshot
   ): Observable<any> {
-
     return this.photosService.get(route.params['slug'])
-      .pipe(
-        map( (photo) => {
-          if (this.userService.getCurrentUser().username === photo.takenBy.username) {
-            return photo;
-          } else {
-            this.router.navigateByUrl('/');
-          }
-        }),
-        catchError((err) => this.router.navigateByUrl('/'))
-      );
+    .pipe(
+      map( (photo) => {
+        if (this.userService.getCurrentUser().username === photo.createdBy.username) {
+          return photo;
+        } else {
+          this.router.navigateByUrl('/');
+        }
+      }),
+      catchError( () => this.router.navigateByUrl('/'))
+    );
 
   }
 

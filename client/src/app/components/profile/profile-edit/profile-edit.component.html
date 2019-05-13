@@ -2,8 +2,6 @@
   <div class="container page">
     <div class="row">
       <div class="col-md-12 col-sm-12">
-
-        <h4 class="page-header text-center text-primary"><strong>Your Profile</strong></h4>
         <app-list-errors [errors]="errors"></app-list-errors>
         <div *ngIf="user.image">
           <img class="user-image mx-auto d-block" src="{{avatar_url}}{{user.image}}" alt="{{user.username}}">
@@ -24,6 +22,14 @@
              placeholder="Upload file"
              formControlName="uploadFile"
              accept=".jpg, .jpeg, .png, .gif">
+          </div>
+
+          <div *ngIf="wrongFileType" class="alert alert-danger" role="alert">
+            Image file (jpg, .jpeg, .png, .gif files) only !
+          </div>
+
+          <div *ngIf="fileTooLarge" class="alert alert-danger" role="alert">
+            File is too large. Accepted file size: {{sizeLimit}} MB.
           </div>
 
           <div class="form-group">
@@ -52,7 +58,7 @@
 
           <div class="form-group">
             <label for="bio"><strong>Biography</strong></label>
-            <textarea class="form-control" id="bio"
+            <textarea class="form-control" id="bio" rows="8"
               formControlName="bio" placeholder="Describe you self...">
             </textarea>
           </div>

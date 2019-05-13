@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -16,12 +16,11 @@ export class PhotoDetailResolverService implements Resolve<Photo> {
   ) { }
 
   resolve(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    route: ActivatedRouteSnapshot
   ): Observable<any> {
 
     return this.photosService.get(route.params['slug'])
-    .pipe(catchError((err) => this.router.navigateByUrl('/')));
+    .pipe(catchError(() => this.router.navigateByUrl('/')));
 
   }
 

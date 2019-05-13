@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class ApiService {
@@ -30,7 +30,7 @@ export class ApiService {
     .pipe(catchError(this.formatErrors));
   }
 
-  delete(path): Observable<any> {
+  delete(path: string): Observable<any> {
     return this.http.delete(`${environment.api_url}${path}`)
     .pipe(catchError(this.formatErrors));
   }

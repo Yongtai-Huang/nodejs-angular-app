@@ -15,7 +15,7 @@ const PhotoSchema = new mongoose.Schema({
   downvotesCount: {type: Number, default: 0},
   photoComments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PhotoComment' }], //pcomments => comments ??
   tagList: [{ type: String }],
-  takenBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   takenAt: Date
 }, {timestamps: true});
 
@@ -86,10 +86,12 @@ PhotoSchema.methods.toJSONFor = function(user){
     updatedAt: this.updatedAt,
     upvotesCount: this.upvotesCount,
     downvotesCount: this.downvotesCount,
-    upvoted: user ? user.isPhotoUpvote(this._id) : false, // The user has already upvote the photo or not
+    // The user has already upvote the photo or not
+    upvoted: user ? user.isPhotoUpvote(this._id) : false,
     downvoted: user ? user.isPhotoDownvote(this._id) : false,
     tagList: this.tagList,
-    takenBy: this.takenBy.toProfileJSONFor(user), // The profile of the person that took the photo
+    // The profile of the person that took the photo
+    createdBy: this.createdBy.toProfileJSONFor(user),
     takenAt: this.takenAt
   };
 };

@@ -20,13 +20,16 @@ export class ProfileEditComponent implements OnInit {
   profileEditForm: FormGroup;
   errors: Errors = new Errors();
   isSubmitting = false;
-	username: string;
-	uploadFile: File;
-	bio: string;
-	email: string;
-	password: string;
+  username: string;
+  bio: string;
+  email: string;
+  password: string;
   formData: FormData = new FormData();
-  removeAvatar: boolean = false;
+  removeAvatar = false;
+  fileList: FileList;
+  wrongFileType = false;
+  sizeLimit = 1;  // MB
+  fileTooLarge = false;
 
   constructor(
     private title: Title,
@@ -59,7 +62,7 @@ export class ProfileEditComponent implements OnInit {
     this.removeAvatar = !this.removeAvatar;
 
     if (this.formData === null) {
-      let formData: FormData = new FormData();
+      const formData: FormData = new FormData();
       formData.append('removeAvatar', this.removeAvatar.toString());
       this.formData = formData;
     } else {
@@ -67,21 +70,23 @@ export class ProfileEditComponent implements OnInit {
     }
   }
 
-  // Get image file //Added by hyt
-  fileChange(event) {
-    let fileList: FileList = event.target.files;
+  // Get image file
+  fileChange(event: any) {
+    this.fileTooLarge = false;
+    this.wrongFileType = false;
+    const file: File = this.fileList[0];
 
-    if (fileList.length > 0) {
-      let file: File = fileList[0];
-
-      if (this.formData === null) {
-        let formData: FormData = new FormData();
-        formData.append('uploadFile', file, file.name);
-        this.formData = formData;
-      } else {
-        this.formData.append('uploadFile', file, file.name);
-      }
+    if (file.size / Math.pow(1024, 2) > this.sizeLimit) {
+      this.fileTooLarge = true;
+      return;
     }
+
+    const ind = ['jpg', 'jpeg', 'png', 'gif'].indexOf(file.type.split('/')[1]);
+    if (file.type.split('/')[0] !== 'image' || ind < 0) {
+      this.wrongFileType = true;
+      return;
+    }
+    this.fileList = event.target.files;
   }
 
   logout() {
@@ -89,12 +94,24 @@ export class ProfileEditComponent implements OnInit {
     this.router.navigateByUrl('/');
   }
 
-  submitForm(value) {
+  submitForm(value: any) {
     this.isSubmitting = true;
     this.errors = {errors: {}};
 
+    if (this.fileList && this.fileList.length > 0) {
+      const file: File = this.fileList[0];
+
+      if (this.formData === null) {
+        const formData: FormData = new FormData();
+        formData.append('uploadFile', file, file.name);
+        this.formData = formData;
+      } else {
+        this.formData.append('uploadFile', file, file.name);
+      }
+    }
+
     if (this.formData === null) {
-      let formData: FormData = new FormData();
+      const formData: FormData = new FormData();
       formData.append('username', value.username);
       this.formData = formData;
     } else {
@@ -126,21 +143,24 @@ export class ProfileEditComponent implements OnInit {
     .subscribe( (updatedUser) => {
       this.isSubmitting = false;
       this.formData = null;
+      this.fileList = null;
       this.removeAvatar = false;
-      this.router.navigateByUrl('/profile/' + updatedUser.username);
+      this.router.navigateByUrl('/profile/' + updatedUser.username + '/profile-info');
     }, err => {
         this.errors = err.error;
         this.isSubmitting = false;
         this.formData = null;
+        this.fileList = null;
         this.removeAvatar = false;
     });
   }
 
   cancel() {
     this.formData = null;
+    this.fileList = null;
     this.isSubmitting = false;
     this.removeAvatar = false;
-    this.router.navigateByUrl('/profile/' + this.user.username);
+    this.router.navigateByUrl('/profile/' + this.user.username + '/profile-info');
   }
 
 }

@@ -1,81 +1,83 @@
-  <div class="container">
-    <h4 class="page-header text-center text-primary">
-      <strong>{{pageTitle}}</strong>
-    </h4>
-    <div *ngIf="photo.image">
-      <p class="text"><strong>Uploaded Photo:</strong></p>
-      <img class="photo-img mx-auto d-block" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
-    </div>
-    <app-list-errors class="text-danger" [errors]="errors"></app-list-errors>
-
-    <div class="row">
-      <div [ngClass]="isMappingLocation ? 'col-md-6 col-sm-12' : 'col-md-12 col-sm-12' ">
-        <form [formGroup]="photoForm">
-          <div class="form-group">
-            <label *ngIf="!photo.image" for="uploadFile"><strong>Upload Image File</strong></label>
-            <label *ngIf="photo.image" for="uploadFile"><strong>Update Image File</strong></label>
-            <input type="file" id="uploadFile"
-             (change)="fileChange($event)"
-             placeholder="Upload file"
-             [ngClass]="{ 'invalid' : !isFileSelected && !photo.image}"
-             class="form-control" formControlName="uploadFile"
-             accept=".jpg, .jpeg, .png, .gif">
-             <small id="fileHelp" class="form-text text-muted"
-               *ngIf="!isFileSelected && !photo.image">
-                Required. Maximum file size: 5 megabytes.
-              </small>
-          </div>
-
-          <div class="form-group">
-            <label for="title"><strong>Title</strong></label>
-            <input class="form-control"
-              formControlName="title" id="title"
-              type="text"
-              placeholder="Photo Title" />
-          </div>
-
-          <div class="form-group">
-            <label for="description"><strong>Description</strong></label>
-            <textarea class="form-control" id="description"
-              formControlName="description"
-              placeholder="Describe the photo...">
-            </textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="takenAt"><strong>Photo was taken at</strong></label>
-            <input class="form-control"
-              formControlName="takenAt"
-              type="date" id="takenAt"
-              placeholder="What date was photo taken" />
-          </div>
-
-          <div class="form-group">
-            <label for="tagField"><strong>Tags</strong></label>
-            <div class="tag-list">
-              <div *ngFor="let tag of photo.tagList"
-                class="badge badge-pill badge-light">
-                <i class="fa fa-times" aria-hidden="true" (click)="removeTag(tag)"></i>
-                {{tag}}
-              </div>
-            </div>
-            <input class="form-control"
-              type="text"
-              placeholder="Type a tag and press Enter"
-              [formControl]="tagField"
-              (keyup.enter)="addTag()" />
-          </div>
-
-          <button [disabled]="!photoForm.valid || isSubmitting || !isFileSelected && !photo.image"
-            class="btn btn-primary" type="button" (click)="submitForm(photoForm.value)">
-            Submit
-          </button>
-          <button class="btn btn-info" type="button" (click)="cancel()">
-            Cancel
-          </button>
-        </form>
-      </div>
-
-    </div>
-
+<div class="container">
+  <h5 class="page-header text-center text-primary">
+    <strong>{{pageTitle}}</strong>
+  </h5>
+  <div *ngIf="photo.image">
+    <p class="text"><strong>Uploaded Photo:</strong></p>
+    <img class="photo-img mx-auto d-block" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
   </div>
+  <app-list-errors class="text-danger" [errors]="errors"></app-list-errors>
+
+  <form [formGroup]="photoForm">
+    <div class="form-group">
+      <label *ngIf="photo.image" for="uploadFile">
+        <strong><span>{{ photo.image ? 'Update' : 'Upload' }}</span>&nbsp;Update Image File</strong>
+      </label>
+      <input type="file" id="uploadFile"
+        (change)="fileChange($event)"
+        placeholder="Upload file"
+        class="form-control" formControlName="uploadFile"
+        accept=".jpg, .jpeg, .png, .gif">
+        <small id="fileHelp" class="form-text text-muted"
+          *ngIf="!isFileSelected && !photo.image">
+          Required. Maximum file size: 5 megabytes.
+        </small>
+    </div>
+
+    <div *ngIf="wrongFileType" class="alert alert-danger" role="alert">
+      Image file (jpg, .jpeg, .png, .gif files) only !
+    </div>
+
+    <div *ngIf="fileTooLarge" class="alert alert-danger" role="alert">
+      File is too large. Accepted file size: {{ sizeLimit }} MB.
+    </div>
+
+    <div class="form-group">
+      <label for="title"><strong>Title</strong></label>
+      <input class="form-control"
+        formControlName="title" id="title"
+        type="text"
+        placeholder="Photo Title" />
+    </div>
+
+    <div class="form-group">
+      <label for="description"><strong>Description</strong></label>
+      <textarea class="form-control" id="description"
+        formControlName="description"
+        placeholder="Describe the photo...">
+      </textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="takenAt"><strong>Photo was taken at</strong></label>
+      <input class="form-control"
+        formControlName="takenAt"
+        type="date" id="takenAt"
+        placeholder="What date was photo taken" />
+    </div>
+
+    <div class="form-group">
+      <label for="tagField"><strong>Tags</strong></label>
+      <div class="tag-list">
+        <div *ngFor="let tag of photo.tagList"
+          class="badge badge-pill badge-light">
+          <i class="fa fa-times" aria-hidden="true" (click)="removeTag(tag)"></i>
+          {{tag}}
+        </div>
+      </div>
+      <input class="form-control"
+        type="text"
+        placeholder="Type a tag and press Enter"
+        [formControl]="tagField"
+        (keyup.enter)="addTag()" />
+    </div>
+
+    <button [disabled]="!photoForm.valid || isSubmitting || !isFileSelected && !photo.image"
+      class="btn btn-primary" type="button" (click)="submitForm(photoForm.value)">
+      Submit
+    </button>
+    <button class="btn btn-info" type="button" (click)="cancel()">
+      Cancel
+    </button>
+  </form>
+</div>

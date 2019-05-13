@@ -11,18 +11,18 @@
   margin-right: 0.25em;
 }
 
-.tags {
-  margin-top: 1em;
-  padding: 0.25em;
-}
-
-.feed-toggle ul li a {
+.side-bar ul li a {
   text-transform: capitalize;
   margin-bottom: 0.5em;
 }
 
-.feed-toggle ul li a:hover {
+.side-bar ul li a:hover {
   background-color: #ddffdd;
+}
+
+.selected {
+  color: red !important;
+  background-color: #f1f1f1;
 }
 
 .badge {

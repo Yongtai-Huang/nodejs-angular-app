@@ -12,17 +12,18 @@ const multer  = require('multer');
 const fs = require('fs');
 const path = require('path');
 
+// Fize size limit: 5 MB
+const photoFileSizeLimit = 5 * Math.pow(1024, 2);
 // Set the storage: image files will be stored in the folder: public/upload/photos
+const photos_dir = path.join(__dirname, '../..', 'public/upload', 'photos');
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../..', 'public/upload', 'photos')
+  destination: photos_dir
 });
 
-// Init upload
-// Fize size limit: 5 MB
-// Only one file
+// Init upload: one file
 const upload = multer({
   storage: storage,
-  limits: {fileSize: 5000000},
+  limits: {fileSize: photoFileSizeLimit},
   fileFilter: function(req, file, cb){
     checkFileType(file, cb);
   }
@@ -46,11 +47,43 @@ function checkFileType(file, cb){
   }
 }
 
+// Rename file
+function renamePhotoFile(file) {
+  return new Promise(function(resolve, reject) {
+    let filename = "p" + (new Date).valueOf() + "-" + file.originalname;
+
+    fs.rename(file.path, path.join(photos_dir, filename), function(err) {
+      if (err) reject(err)
+      resolve(filename);
+    });
+
+  });
+}
+
+// Remove file
+function removePhotoFile(filename) {
+  return new Promise(function(resolve, reject) {
+    fs.unlink(path.join(photos_dir, filename), function(err) {
+      if(err && err.code == 'ENOENT') {
+        console.info("File doesn't exist, won't remove it.");
+        reject(err);
+      } else if (err) {
+        console.error("Error occurred while trying to remove image file");
+        reject(err);
+      }
+
+      console.info(`previous image file removed`);
+      resolve();
+    });
+
+  });
+}
+
 // Preload photo objects on routes with ':photo'
 // The photo object: req.photo
 router.param('photo', function(req, res, next, slug) {
   Photo.findOne({ slug: slug })
-    .populate('takenBy')
+    .populate('createdBy')
     .then( function(photo) {
       if (!photo) { return res.sendStatus(404); }
 
@@ -60,7 +93,7 @@ router.param('photo', function(req, res, next, slug) {
     }).catch(next);
 });
 
-// Preload photo comments on routes with ':photo-comment'
+// Preload photo comment on routes with ':photo-comment'
 // req.photoComment
 router.param('photoComment', function(req, res, next, id) {
   PhotoComment.findById(id).then(function(comment){
@@ -78,32 +111,36 @@ router.get('/', auth.optional, function(req, res, next) {
   // limit and offset are used for pagination
   // limit: the maxium number of photos that can be displayed on a page
   // offset: depends on the page
+
   let limit = 20; //default
   let offset = 0; //default
 
+  // Set limit if provided
   if(typeof req.query.limit !== 'undefined'){
     limit = req.query.limit;
   }
 
+  // Set offset if provided
   if(typeof req.query.offset !== 'undefined'){
     offset = req.query.offset;
   }
 
+  // Query photos by photo tag
   if( typeof req.query.tag !== 'undefined' ){
     query.tagList = {"$in" : [req.query.tag]};
   }
 
   Promise.all([
-    req.query.takenBy ? User.findOne({username: req.query.takenBy}) : null,
+    req.query.createdBy ? User.findOne({username: req.query.createdBy}) : null,
     req.query.upvoted ? User.findOne({username: req.query.upvoted}) : null,
     req.query.downvoted ? User.findOne({username: req.query.downvoted}) : null
   ]).then(function(results){
-    let takenBy = results[0];
+    let createdBy = results[0];
     let upvoter = results[1];
     let downvoter = results[2];
 
-    if(takenBy){
-      query.takenBy = takenBy._id;
+    if(createdBy){
+      query.createdBy = createdBy._id;
     }
 
     if(upvoter){
@@ -123,7 +160,7 @@ router.get('/', auth.optional, function(req, res, next) {
         .limit(Number(limit))
         .skip(Number(offset))
         .sort({createdAt: 'desc'})
-        .populate('takenBy')
+        .populate('createdBy')
         .exec(),
       Photo.count(query).exec(),
       req.payload ? User.findById(req.payload.id) : null
@@ -159,12 +196,13 @@ router.get('/feed', auth.required, function(req, res, next) {
     if (!user) { return res.sendStatus(401); }
 
     Promise.all([
-      Photo.find({ takenBy: {$in: user.following}})
+      Photo.find({ createdBy: {$in: user.following}})
         .limit(Number(limit))
         .skip(Number(offset))
-        .populate('takenBy')
+        .sort({createdAt: 'desc'})
+        .populate('createdBy')
         .exec(),
-      Photo.count({ takenBy: {$in: user.following}})
+      Photo.count({ createdBy: {$in: user.following}})
     ]).then(function(results){
       let photos = results[0];
       let photosCount = results[1];
@@ -192,25 +230,18 @@ router.post('/', auth.required, function(req, res, next) {
         console.log('Fail to submit');
         return res.status(422).json({errors: {'Submit error': "Error to submit."}});
       }
-    } else {
-      User.findById(req.payload.id).then(function(user) {
-        if (!user) { return res.sendStatus(401); }
+    }
 
-        let photo = new Photo();
-        photo.takenBy = user;
+    User.findById(req.payload.id).then(function(user) {
+      if (!user) { return res.sendStatus(401); }
 
-        let filename = '';
-        if (req.file) {
-          let file = req.file;
-          filename = "pho" + (new Date).valueOf() + "-" + file.originalname;
+      let photo = new Photo();
+      photo.createdBy = user;
 
-          fs.rename(file.path, path.join(__dirname, '../..', 'public/upload', 'photos', filename), function(err) {
-            if (err) throw err;
-          });
+      return Promise.resolve(req.file ? renamePhotoFile(req.file) : null)
+      .then(function(filename) {
+        if (filename) {
           photo.image = filename;
-        } else {
-          console.log('No image file is uploaded');
-          return res.status(422).json({errors: {'Image file': "is not chosen."}});
         }
 
         if (req.body.title) {
@@ -229,34 +260,19 @@ router.post('/', auth.required, function(req, res, next) {
           photo.takenAt = req.body.takenAt;
         }
 
-        if (req.body.latitude) {
-          photo.latitude = req.body.latitude;
-        }
-
-        if (req.body.longitude) {
-          photo.longitude = req.body.longitude;
-        }
-
         return photo.save().then( function(photoData) {
           return res.json({photo: photoData.toJSONFor(user)});
-        }, function(err) {
-          return res.send({error: err});
         });
-      }).catch(next);
 
-    }
+      });
+    }).catch(next);
   });
-
 });
 
 // Get a photo
 router.get('/:photo', auth.optional, function(req, res, next) {
-  Promise.all([
-    req.payload ? User.findById(req.payload.id) : null,
-    req.photo.populate('takenBy').execPopulate()
-  ]).then(function(results){
-    let user = results[0];
-
+  Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+  .then(function(user){
     return res.json({photo: req.photo.toJSONFor(user)});
   }).catch(next);
 });
@@ -275,175 +291,106 @@ router.put('/:photo', auth.required, function(req, res, next) {
         console.log('Fail to submit');
         return res.status(422).json({errors: {'Submit error': "Error to submit."}});
       }
-    } else {
-      User.findById(req.payload.id).then(function(user) {
-        if(!user){ return res.sendStatus(401); }
-
-        Photo.findOne({slug: req.body.slug})
-          .populate('takenBy')
-          .exec()
-          .then( function(photoData) {
-            if (!photoData) {
-              res.sendStatus(401);
-            }
-
-            let updatedPhoto = photoData;
-
-            if(photoData.takenBy._id.toString() === req.payload.id.toString()) {
-              if(typeof req.body.title !== 'undefined'){
-                updatedPhoto.title = req.body.title;
-              }
-
-              if(typeof req.body.description !== 'undefined'){
-                updatedPhoto.description = req.body.description;
-              }
-
-              if (typeof req.body.tagList !== 'undefined') {
-                updatedPhoto.tagList = JSON.parse(req.body.tagList);
-              }
-
-              if (typeof req.body.takenAt !== 'undefined') {
-                updatedPhoto.takenAt = req.body.takenAt;
-              }
-
-              if (typeof req.body.latitude !== 'undefined') {
-                updatedPhoto.latitude = req.body.latitude;
-              }
-
-              if (typeof req.body.longitude !== 'undefined') {
-                updatedPhoto.longitude = req.body.longitude;
-              }
-
-              //Get the file path to remove the file
-              let filePath = '';
-              if (photoData.image) {
-                filePath = path.join(__dirname, '../..', 'public/upload', 'photos', photoData.image);
-              }
-
-              let filename = '';
-              if (req.file) {
-                let file = req.file;
-                filename = "a" + (new Date).valueOf() + "-" + file.originalname;
-                fs.rename(file.path, path.join(__dirname, '../..', 'public/upload', 'photos', filename), function (err) {
-                  if (err) throw err;
-                });
-                updatedPhoto.image = filename;
-              }
-
-              return updatedPhoto.save().then( function(photo) {
-                // To remove previous file
-                if (filePath && filename) {
-                  fs.unlink(filePath, function(err) {
-                    if(err && err.code == 'ENOENT') {
-                      // File doens't exist
-                      console.info("File doesn't exist, won't remove it.");
-                    } else if (err) {
-                      // Other errors, e.g. maybe we don't have enough permission
-                      console.error("Error occurred while trying to remove image file");
-                    } else {
-                      console.info(`previous image file removed`);
-                    }
-                  });
-                }
-
-                return res.json({photo: photo.toJSONFor(user)});
-              }, function(err) {
-                return res.send({error: err});
-              });
-
-            } else {
-              return res.sendStatus(403);
-            }
-
-          });
-      }).catch(next);
     }
-  });
 
+    User.findById(req.payload.id).then(function(user) {
+      if(!user || photoData.createdBy._id.toString() !== req.payload.id.toString()) {
+        return res.sendStatus(403);
+      }
+
+      let updatedPhoto = req.photo;
+
+      if(typeof req.body.title !== 'undefined'){
+        updatedPhoto.title = req.body.title;
+      }
+
+      if(typeof req.body.description !== 'undefined'){
+        updatedPhoto.description = req.body.description;
+      }
+
+      if (typeof req.body.tagList !== 'undefined') {
+        updatedPhoto.tagList = JSON.parse(req.body.tagList);
+      }
+
+      if (typeof req.body.takenAt !== 'undefined') {
+        updatedPhoto.takenAt = req.body.takenAt;
+      }
+
+      // Remove revious file and rename the newly uploaded file
+      return Promise.all([
+        req.file ? renamePhotoFile(req.file) : null,
+        req.file && req.photo.image ? removePhotoFile(req.photo.image) : null
+      ]).then(function(results){
+        let filename = results[0];
+
+        if (filename) {
+          updatedPhoto.image = filename;
+        }
+
+        return updatedPhoto.save().then( function(photo) {
+          return res.json({photo: photo.toJSONFor(user)});
+        });
+
+      });
+    }).catch(next);
+  });
 });
 
+// Delete photo
 router.delete('/:photo', auth.required, function(req, res, next) {
   const photoId = req.photo._id;
   User.findById(req.payload.id).then(function(user) {
-    if (!user) { return res.sendStatus(401); }
-
-    // Get the file path to remove
-    let filePath = '';
-    if (req.photo.image) {
-      filePath = path.join(__dirname, '../..', 'public/upload', 'photos', req.photo.image);
+    if(!user || req.photo.createdBy._id.toString() !== req.payload.id.toString()){
+      return res.sendStatus(401);
     }
 
-    if(req.photo.takenBy._id.toString() === req.payload.id.toString()){
-      return req.photo.remove().then(function() {
-        // Remove image file
-        if (filePath) {
-          fs.unlink(filePath, function(err) {
-            if(err && err.code == 'ENOENT') {
-              // File doens't exist
-              console.info("Photo file doesn't exist, won't remove it.");
-            } else if (err) {
-              // Other errors, e.g. maybe we don't have enough permission
-              console.error("Error occurred while trying to remove photo file");
-            } else {
-              console.info(`previous photo file removed`);
-            }
-          });
+    // Remove photo and file
+    return Promise.all([
+      req.photo.remove(),
+      req.photo.image ? removePhotoFile(req.photo.image) : null
+    ]).then(function() {
+      // Update photo upvotes and downvotes
+      return User.update( {photoUpvotes: {$in: [photoId]}}, {$pull: {photoUpvotes: photoId}}, { safe: true }, function(err) {
+        if(err) {
+          console.error("Error occurred while removing photo upvotes");
+          return res.sendStatus(403);
         }
-
-        return User.update( {photoUpvotes: {$in: [photoId]}}, {$pull: {photoUpvotes: photoId}}, { safe: true }, function(err) {
+        return User.update( {photoDownvotes: {$in: [photoId]}}, {$pull: {photoDownvotes: photoId}}, { safe: true }, function(err) {
           if(err) {
-            console.error("Error occurred while removing photo upvotes");
+            console.error("Error occurred while removing photo downvotes");
             return res.sendStatus(403);
           }
-          return User.update( {photoDownvotes: {$in: [photoId]}}, {$pull: {photoDownvotes: photoId}}, { safe: true }, function(err) {
-            if(err) {
-              console.error("Error occurred while removing photo downvotes");
-              return res.sendStatus(403);
-            }
-            return res.sendStatus(204);
-          });
+          return res.sendStatus(204);
         });
       });
-    } else {
-      return res.sendStatus(403);
-    }
+    });
   }).catch(next);
 });
 
 // Upvote an photo
 router.post('/:photo/upvote', auth.required, function(req, res, next) {
   const photoId = req.photo._id;
-  const takenBy = req.photo.takenBy;
 
   User.findById(req.payload.id).then(function(user){
-    if (!user || user._id.toString() === req.photo.takenBy._id.toString()) {
+    if (!user || user._id.toString() === req.photo.createdBy._id.toString()) {
       return res.status(401).json({errors: {'Unauthorized error': "You are not allowed to upvote this photo."}});
     }
 
-    if (user.photoUpvotes.indexOf(photoId) === -1) {
-      user.photoUpvotes.push(photoId);
-
-      let ind = user.photoDownvotes.indexOf(photoId);
-      if (ind > -1) {
-        user.photoDownvotes.splice(ind, 1);
-        return user.save().then( function(userData){
-          return req.photo.updateUpDownvoteCount().then( function(photo){
-            return res.json({photo: photo.toJSONFor(userData)});
-          });
-        });
-
-      } else {
-        return user.save().then( function(userData){
-          return req.photo.updateUpvoteCount().then( function(photo){
-            return res.json({photo: photo.toJSONFor(userData)});
-          });
-        });
-      }
-
-    } else {
-      console.log("You have already upvoted this photo");
+    if (user.photoUpvotes.indexOf(photoId) > -1) {
       return res.sendStatus(400);
     }
+    user.photoUpvotes.push(photoId);
+
+    let ind = user.photoDownvotes.indexOf(photoId);
+    if (ind > -1) {
+      user.photoDownvotes.splice(ind, 1);
+    }
+
+    return user.save().then( function(userData){
+      return req.photo.updateUpDownvoteCount().then( function(photo){
+        return res.json({photo: photo.toJSONFor(userData)});
+      });
+    });
 
   }).catch(next);
 });
@@ -454,33 +401,25 @@ router.post('/:photo/downvote', auth.required, function(req, res, next) {
 
   User.findById(req.payload.id).then(function(user){
 
-    if (!user || user._id.toString() === req.photo.takenBy._id.toString()) {
+    if (!user || user._id.toString() === req.photo.createdBy._id.toString()) {
       return res.status(401).json({errors: {'Unauthorized error': "You are not allowed to downvote this photo."}});
     }
 
-    if (user.photoDownvotes.indexOf(photoId) === -1) {
-      user.photoDownvotes.push(photoId);
-
-      let ind = user.photoUpvotes.indexOf(photoId);
-      if (ind > -1) {
-        user.photoUpvotes.splice(ind, 1);
-        return user.save().then( function(userData){
-          return req.photo.updateUpDownvoteCount().then(function(photo){
-            return res.json({photo: photo.toJSONFor(userData)});
-          });
-        });
-
-      } else {
-        return user.save().then( function(userData){
-          return req.photo.updateDownvoteCount().then(function(photo){
-            return res.json({photo: photo.toJSONFor(userData)});
-          });
-        });
-      }
-    } else {
-      console.log("You have already downvoted this photo");
+    if (user.photoDownvotes.indexOf(photoId) > -1) {
       return res.sendStatus(400);
     }
+    user.photoDownvotes.push(photoId);
+
+    let ind = user.photoUpvotes.indexOf(photoId);
+    if (ind > -1) {
+      user.photoUpvotes.splice(ind, 1);
+    }
+
+    return user.save().then( function(userData){
+      return req.photo.updateUpDownvoteCount().then(function(photo){
+        return res.json({photo: photo.toJSONFor(userData)});
+      });
+    });
 
   }).catch(next);
 });
@@ -491,24 +430,21 @@ router.delete('/:photo/upvote', auth.required, function(req, res, next) {
 
   User.findById(req.payload.id).then(function(user){
 
-    if (!user || user._id.toString() === req.photo.takenBy._id.toString()) {
+    if (!user || user._id.toString() === req.photo.createdBy._id.toString()) {
       return res.status(401).json({errors: {'Unauthorized error': "You are not allowed to cancel the upvote on this photo."}});
     }
 
     let ind = user.photoUpvotes.indexOf(photoId);
-    if ( ind > -1) {
-      user.photoUpvotes.splice(ind, 1);
-
-      return user.save().then( function(userData) {
-        return req.photo.updateUpvoteCount().then(function(photo){
-          return res.json({photo: photo.toJSONFor(userData)});
-        });
-      });
-
-    } else {
-      console.log("You did not upvote this article");
+    if ( ind < 0) {
       return res.sendStatus(404);
     }
+    user.photoUpvotes.splice(ind, 1);
+
+    return user.save().then( function(userData) {
+      return req.photo.updateUpvoteCount().then(function(photo){
+        return res.json({photo: photo.toJSONFor(userData)});
+      });
+    });
 
   }).catch(next);
 });
@@ -519,23 +455,21 @@ router.delete('/:photo/downvote', auth.required, function(req, res, next) {
 
   User.findById(req.payload.id).then(function(user){
 
-    if (!user || user._id.toString() === req.photo.takenBy._id.toString()) {
+    if (!user || user._id.toString() === req.photo.createdBy._id.toString()) {
       return res.status(401).json({errors: {'Unauthorized error': "You are not allowed to cancel the downvote on this photo."}});
     }
 
     let ind = user.photoDownvotes.indexOf(photoId);
-    if (ind > -1) {
-      user.photoDownvotes.splice(ind, 1);
-      return user.save().then( function(userData){
-        return req.photo.updateDownvoteCount().then(function(photo){
-          return res.json({photo: photo.toJSONFor(userData)});
-        });
-      });
-
-    } else {
-      console.log("You did not downvote this article");
+    if (ind < 0) {
       return res.sendStatus(404);
     }
+    user.photoDownvotes.splice(ind, 1);
+
+    return user.save().then( function(userData){
+      return req.photo.updateDownvoteCount().then(function(photo){
+        return res.json({photo: photo.toJSONFor(userData)});
+      });
+    });
 
   }).catch(next);
 });
@@ -570,25 +504,24 @@ router.post('/:photo/photoComments', auth.required, function(req, res, next) {
       return req.photo.save().then(function(photo) {
         res.json({photoComment: photoComment.toJSONFor(user)});
       });
-      
+
     });
   }).catch(next);
 });
 
 // Remove a comment
 router.delete('/:photo/photoComments/:photoComment', auth.required, function(req, res, next) {
-  if(req.photoComment.author.toString() === req.payload.id.toString()){
-    req.photo.photoComments.remove(req.photoComment._id);
-
-    req.photo.save()
-    .then(PhotoComment.find({_id: req.photoComment._id}).remove().exec())
-    .then(function(){
-      return res.sendStatus(204);
-    }).catch(next);
-
-  } else {
-    return res.sendStatus(403);
+  if(req.photoComment.author.toString() !== req.payload.id.toString()){
+    return res.sendStatus(401);
   }
+
+  req.photo.photoComments.remove(req.photoComment._id);
+
+  req.photo.save()
+  .then(PhotoComment.find({_id: req.photoComment._id}).remove().exec())
+  .then(function(){
+    return res.sendStatus(204);
+  }).catch(next);
 });
 
 module.exports = router;

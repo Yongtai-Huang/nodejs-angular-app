@@ -14,7 +14,7 @@
   max-width: 100%;
 }
 
-.photo-takenBy-img {
+.photo-createdBy-img {
   height: 30px;
   width: 30px;
   border-radius: 50px;
@@ -22,6 +22,19 @@
   margin-right: 5px;
 }
 
-.date {
-  font-size: 13px;
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.no-button {
+  border: none;
+  background: white;
+}
+
+.comment-block {
+  margin-bottom: 5em;
 }

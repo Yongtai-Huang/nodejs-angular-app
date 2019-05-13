@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { User } from '../../../models/user.model';
 import { Photo } from '../../../models/photo.model';
@@ -26,14 +25,13 @@ export class PhotoPreviewComponent implements OnInit {
 
   constructor(
     private photosService: PhotosService,
-    private router: Router,
     private userService: UserService
   ) { }
 
   ngOnInit() {
     this.userService.currentUser.subscribe( (userData: User) => {
       this.currentUser = userData;
-      this.canVote = (this.currentUser.username !== this.photo.takenBy.username)
+      this.canVote = (this.currentUser.username !== this.photo.createdBy.username)
     });
 
     this.userService.isAuthenticated.subscribe( (authenticated) => {

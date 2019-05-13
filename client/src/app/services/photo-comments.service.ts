@@ -12,18 +12,18 @@ export class PhotoCommentsService {
     private apiService: ApiService
   ) { }
 
-  add(slug, payload): Observable<PhotoComment> {
+  add(slug: string, payload: string): Observable<PhotoComment> {
     return this.apiService
     .post( `/photos/${slug}/photoComments`, { photoComment: { body: payload } } )
     .pipe(map(data => data.photoComment));
   }
 
-  getAll(slug): Observable<PhotoComment[]> {
+  getAll(slug: string): Observable<PhotoComment[]> {
     return this.apiService.get(`/photos/${slug}/photoComments`)
     .pipe(map(data => data.photoComments));
   }
 
-  destroy(photoCommentId, slug) {
+  destroy(photoCommentId: string, slug: string) {
     return this.apiService
     .delete(`/photos/${slug}/photoComments/${photoCommentId}`);
   }

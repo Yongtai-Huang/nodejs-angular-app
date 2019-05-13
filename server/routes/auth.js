@@ -11,38 +11,14 @@ function getTokenFromHeader(req){
 
     return req.headers.authorization.split(' ')[1];
   }
-
+  
   return null;
 }
 
-// User with admin role
-// function getTokenFromHeaderWithAdmin(req){
-//   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token' ||
-//       req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-//
-//     let token = req.headers.authorization.split(' ')[1];
-//     return jsonwebtoken.verify(token, secret, (err, decoded) => {
-//       if (err) {
-//         res.status(401).json({errors: {'Auth err': "Failed to authenticate."}});
-//       } else {
-//         if (decoded['admin']) {
-//           return token;
-//         } else {
-//           return null;
-//         }
-//
-//       }
-//     });
-//
-//   }
-//
-//   return null;
-// }
-
-// User with super user role
-function getTokenFromHeaderWithSuperUser(req){
+// User with a super admin role
+function getTokenFromHeaderWithSuperAdmin(req){
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token' ||
-      req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+    req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
 
     let token = req.headers.authorization.split(' ')[1];
     return jsonwebtoken.verify(token, secret, (err, decoded) => {
@@ -50,7 +26,7 @@ function getTokenFromHeaderWithSuperUser(req){
       if (err) {
         res.status(401).json({errors: {'Auth err': "Failed to authenticate."}});
       } else {
-        if (decoded['superUser']) {
+        if (decoded['superAdmin']) {
           return token;
         } else {
           return null;
@@ -64,8 +40,8 @@ function getTokenFromHeaderWithSuperUser(req){
   return null;
 }
 
-// User with admin or superuser role
-function getTokenFromHeaderWithAdminSuperUser(req){
+// User with an admin or superuser role
+function getTokenFromHeaderWithAdminSuperAdmin(req){
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token' ||
       req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
 
@@ -74,8 +50,7 @@ function getTokenFromHeaderWithAdminSuperUser(req){
       if (err) {
         res.status(401).json({errors: {'Auth err': "Failed to authenticate."}});
       } else {
-        //console.log("auth decoded: " + JSON.stringify(decoded));
-        if (decoded['admin'] || decoded['superUser']) {
+        if (decoded['admin'] || decoded['superAdmin']) {
           return token;
         } else {
           return null;
@@ -101,20 +76,15 @@ const auth = {
     credentialsRequired: false,
     getToken: getTokenFromHeader
   }),
-  // admin: jwt({
-  //   secret: secret,
-  //   userProperty: 'payload',
-  //   getToken: getTokenFromHeaderWithAdmin
-  // }),
-  superUser: jwt({
+  superAdmin: jwt({
     secret: secret,
     userProperty: 'payload',
-    getToken: getTokenFromHeaderWithSuperUser
+    getToken: getTokenFromHeaderWithSuperAdmin
   }),
-  adminSuperUser: jwt({
+  adminSuperAdmin: jwt({
     secret: secret,
     userProperty: 'payload',
-    getToken: getTokenFromHeaderWithAdminSuperUser
+    getToken: getTokenFromHeaderWithAdminSuperAdmin
   })
 };
 

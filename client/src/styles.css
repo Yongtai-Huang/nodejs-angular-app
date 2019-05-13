@@ -1,13 +1,43 @@
 /* You can add global styles to this file, and also import other style files */
-body{
- margin-bottom: 48px;
+/* * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+} */
+
+html {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Open Sans', Helvetica, Arial, FreeSans;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
 }
 
 .btn {
   text-transform: capitalize;
-  margin: 0 0.1em 0 0.1em;
+  margin: 0 0.1rem 0 0.1rem;
 }
 
-/* .text-primary {
-  color: #121212!important;
-} */
+.text-primary {
+  color: #333 !important;
+}
+
+.text-success {
+  color: #4caf50!important;
+}

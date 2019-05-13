@@ -1,45 +1,37 @@
 <div class="photo-preview">
   <app-list-errors [errors]="errors"></app-list-errors>
-  <div class="card border-light">
+
+  <div class="">
     <a [routerLink]="['/photo', photo.slug]">
-      <img class="mx-auto d-block" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
-      <h5 class="text-primary text-center"><strong>{{ photo.title }}</strong></h5>
+      <img class="photo-img" src="{{photo_url}}{{photo.image}}" alt="{{photo.title}}">
     </a>
 
-    <div class="card-header">
-      <div class="row">
-        <div class="col-md-7">
-          <a *ngIf="photo.takenBy.image" [routerLink]="['/profile', photo.takenBy.username]">
-            <img src="{{avatar_url}}{{photo.takenBy.image}}" class="photo-takenBy-img" />
+    <div class="py-0 pt-2">
+      <div class="d-flex">
+        <div class="">
+          <a class="text-primary"
+            [routerLink]="['/profile', photo.createdBy.username, 'profile-photos']">
+            {{ photo.createdBy.username }}
           </a>
-
-          <div class="takenBy">
-            <a class="takenBy text-primary"
-              [routerLink]="['/profile', photo.takenBy.username]">
-              <strong>{{ photo.takenBy.username }}</strong>
-            </a>
-            <span class="date text-muted">
-              &nbsp;&nbsp;{{ photo.createdAt | date: 'short' }}
-            </span>
-          </div>
+          <small class="text-muted">
+            &nbsp;&nbsp;{{ photo.createdAt | timeAgo }}
+          </small>
         </div>
 
-        <div class="col-md-5 text-right">
-          <button class="btn btn-sm"
+        <div class="ml-auto">
+          <button class="no-button"
            [disabled]="!canVote || isSubmittingVote || !isAuthenticated"
-           [ngClass]="{ 'btn-light': photo.upvoted }"
            (click)="toggleUpvote()">
-            <i class="fa fa-thumbs-o-up fa-lg text-secondary" aria-hidden="true"></i>
+            <i class="fa" [ngClass]="{'fa-thumbs-up': photo.upvoted, 'fa-thumbs-o-up': !photo.upvoted}" aria-hidden="true"></i>
             <span *ngIf="photo.upvotesCount > 0">
               &nbsp;{{ photo.upvotesCount }}
             </span>
           </button>
 
-          <button class="btn btn-sm"
+          <button class="no-button"
            [disabled]="!canVote || isSubmittingVote || !isAuthenticated"
-           [ngClass]="{ 'btn-light': photo.downvoted }"
            (click)="toggleDownvote()">
-            <i class="fa fa-thumbs-o-down fa-lg text-secondary" aria-hidden="true"></i>
+            <i class="fa" [ngClass]="{'fa-thumbs-down': photo.downvoted, 'fa-thumbs-o-down': !photo.downvoted}" aria-hidden="true"></i>
             <span *ngIf="photo.downvotesCount > 0">
               &nbsp;{{ photo.downvotesCount }}
             </span>

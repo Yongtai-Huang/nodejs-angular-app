@@ -3,7 +3,7 @@ export class PhotoListConfig {
 
   filters: {
     tag?: string,
-    takenBy?: string,
+    createdBy?: string,
     upvoted?: string,
     downvoted?: string,
     limit?: number,

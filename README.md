@@ -27,11 +27,11 @@ The app has the following functionality:
 
 ### Prerequisites
 
-node.js: v8.11.2+
+node.js: v10.13.0+
 
-npm: v5.6.0+
+npm: v6.4.1+
 
-angular CLI: v6.0.7+
+angular CLI: v7.2.1+
 
 mongodb: v3.6
 
@@ -63,4 +63,4 @@ This project is licensed under the MIT License.
 
 ## Key Words
 
-Angular 6, Node.js, Express, MongoDb, Multer, Bootstrap 4
+Angular 7, Node.js, Express, MongoDb, Multer, Bootstrap 4

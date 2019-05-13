@@ -1,27 +1,12 @@
 <footer class="page-footer">
   <div class="container">
-    <div class="row">
-      <div class="col-md-4 col-sm-12">
-        <a class="nav-link text-center" [routerLink]="['/']">
-          <span class="text-secondary">
-            &copy; {{ today | date: 'yyyy' }}
-          </span> &nbsp;&nbsp;&nbsp;
-          <span class="text-success">
-            <strong>PhotoApp</strong>
-          </span>
-        </a>
-      </div>
-      <div class="col-md-4 col-sm-12">
-        <a class="nav-link text-center" [routerLink]="['/contact']">
-          <span class="text-warning">Contact Us</span>
-        </a>
-      </div>
-      <div class="col-md-4 col-sm-12">
-        <a class="nav-link text-center" [routerLink]="['/about']">
-          <span class="text-warning">About Us</span>
-        </a>
-      </div>
-
-    </div>
+    <a class="nav-link text-center" [routerLink]="['/']">
+      <span class="text-white">
+        &copy; {{ today | date: 'yyyy' }}
+      </span> &nbsp;&nbsp;&nbsp;
+      <span class="text-warning">
+        <strong>PhotoApp</strong>
+      </span>
+    </a>
   </div>
 </footer>

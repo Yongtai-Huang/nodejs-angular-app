@@ -1,84 +1,87 @@
 <div class="profile-page">
+	<app-list-errors [errors]="errors"></app-list-errors>
 
-  <div class="user-info">
-    <div class="container">
-      <div class="row">
+  <div class="container d-flex mb-2 p-2 bd-highlight">
+    <div *ngIf="profile.image">
+      <img src="{{avatar_url}}{{profile.image}}" class="user-image mx-auto d-block" />
+    </div>
 
-        <div *ngIf="profile.image" class="col-md-6 col-sm-12">
-          <img src="{{avatar_url}}{{profile.image}}" class="user-image mx-auto d-block" />
-        </div>
+    <div class="ml-3">
+      <h4 *ngIf="profile.firstname && profile.lastname" class="username text-center">
+        <strong>{{ profile.firstname }}&nbsp;&nbsp;{{ profile.lastname }}</strong>
+      </h4>
+      <h4 *ngIf="!profile.firstname || !profile.lastname" class="username text-center">
+        <strong>{{ profile.username }}</strong>
+      </h4>
 
-        <div [ngClass]="profile.image ? 'col-md-6 col-sm-12' : 'col-md-12 col-sm-12'">
-          <h4 *ngIf="profile.firstname && profile.lastname" class="text-username text-center">
-            <strong>{{ profile.firstname }}&nbsp;&nbsp;{{ profile.lastname }}</strong>
-          </h4>
-          <h4 *ngIf="!profile.firstname || !profile.lastname" class="text-username text-center">
-            <strong>{{ profile.username }}</strong>
-          </h4>
+      <div class="my-2">Since {{ profile.createdAt | date: 'yyyy' }}</div>
+      <h6 *ngIf="profile.followersCount"> {{profile.followersCount}} follower<span *ngIf="profile.followersCount > 1">s</span></h6>
+    </div>
 
-          <div *ngIf="profile.bio" [innerHTML]="profile.bio"></div>
-          <p *ngIf="!profile.bio" class="text-muted"> No biography yet.</p>
-          <div class="text-right">
+    <div class="ml-auto align-self-end">
+      <button class="btn"
+        [disabled]="!isAuthenticated || profile.yourself || isSubmittingFollow"
+        [ngClass]="{ 'disabled': isSubmittingFollow,
+                    'btn-danger': isAuthenticated && !profile.following,
+                    'btn-info': profile.following }"
+        (click)="toggleFollowing()">
+        <span *ngIf="!profile.following"><i class="fa fa-plus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+        <span *ngIf="profile.following"><i class="fa fa-minus fa-lg" aria-hidden="true"></i>&nbsp;</span>
+        {{ profile.following ? 'Unfollow' : 'Follow' }}
+        <span *ngIf="profile.followersCount > 0">&nbsp;{{profile.followersCount}}</span>
+      </button>
 
-            <button class="btn btn-sm action-btn" [hidden]="isUser"
-              [hidden]="!isAuthenticated || profile.username === currentUser.username"
-              [ngClass]="{ 'disabled': isSubmittingFollow,
-                           'btn-light': profile.following }"
-              (click)="toggleFollowing()">
-              <span *ngIf="!profile.following"><i class="fa fa-plus fa-lg" aria-hidden="true"></i>&nbsp;</span>
-              <span *ngIf="profile.following"><i class="fa fa-minus fa-lg" aria-hidden="true"></i>&nbsp;</span>
-              {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.username }}
-            </button>
-
-            <app-list-errors [errors]="errors"></app-list-errors>
-
-            <button [routerLink]="['/profile-edit']"
-              [hidden]="!isUser"
-              class="btn btn-sm btn-primary">
-              <i class="ion-gear-a"></i> Edit Profile
-             </button>
-          </div>
-        </div>
-
-      </div>
-      <hr>
+      <button *ngIf="profile.yourself" [routerLink]="['/profile-edit']"
+        class="btn btn-warning">
+        <i class="ion-gear-a"></i> Edit Profile
+        </button>
     </div>
   </div>
 
   <div class="container">
-    <div class="row">
-      <div class="col-md-6 col-sm-12">
-        <div class="photos-toggle">
-          <ul class="nav nav-pills outline-active">
-            <li class="nav-item">
-              <a class="nav-link btn-light btn-sm"
-                 routerLinkActive="active"
-                 [routerLinkActiveOptions]="{ exact: true }"
-                 [routerLink]="['/profile', profile.username, 'profile-photos']">
-                 Photos
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn-light btn-sm"
-                 routerLinkActive="active"
-                 [routerLinkActiveOptions]="{ exact: true }"
-                 [routerLink]="['/profile', profile.username, 'photo-upvotes']">
-                 Favorite Photos
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn-light btn-sm"
-                 routerLinkActive="active"
-                 [routerLinkActiveOptions]="{ exact: true }"
-                 [routerLink]="['/profile', profile.username, 'photo-downvotes']">
-                 Unfavorite Photos
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link  text-info"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="['/profile', profile.username, 'profile-photos']">
+          Photos
+        </a>
+      </li>
+      <li *ngIf="profile.yourself" class="nav-item">
+        <a class="nav-link text-info"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="['/profile', profile.username, 'photos-following']">
+          Photos You Follow
+        </a>
+      </li>
+      <li *ngIf="profile.yourself" class="nav-item">
+        <a class="nav-link text-info"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="['/profile', profile.username, 'photos-upvote']">
+          Favorite Photos
+        </a>
+      </li>
+      <li *ngIf="profile.yourself" class="nav-item">
+        <a class="nav-link text-info"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="['/profile', profile.username, 'photos-downvote']">
+          Unfavorite Photos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-info"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="['/profile', profile.username, 'profile-info']">
+          Info
+        </a>
+      </li>
+    </ul>
+
     <router-outlet></router-outlet>
   </div>
-
 </div>

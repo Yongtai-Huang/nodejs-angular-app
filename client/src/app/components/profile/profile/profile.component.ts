@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
 import { User } from '../../../models/user.model';
@@ -19,7 +19,6 @@ export class ProfileComponent implements OnInit {
   avatar_url = environment.avatar_url;
   profile: Profile;
   currentUser: User;
-  isUser: boolean;
   isSubmittingFollow =false;
   errors: Errors = new Errors();
   isAuthenticated: boolean;
@@ -27,7 +26,6 @@ export class ProfileComponent implements OnInit {
   constructor(
     private title: Title,
     private route: ActivatedRoute,
-    private router: Router,
     private userService: UserService,
     private profileService: ProfileService
   ) { }
@@ -35,10 +33,11 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe((data: {profile: Profile}) => {
       this.profile = data.profile;
+      this.pageTitle = 'Profile of ' + data.profile.username;
+
       // Load the current user's data.
       this.userService.currentUser.subscribe( (userData: User) => {
         this.currentUser = userData;
-        this.isUser = (this.currentUser.username === this.profile.username);
       });
     });
 

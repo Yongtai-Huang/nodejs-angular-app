@@ -39,7 +39,15 @@ router.post('/:username/follow', auth.required, function(req, res, next){
     }
 
     return user.follow(profileId).then(function(){
-      return res.json({profile: req.profile.toProfileJSONFor(user)});
+      return User.count({following: {$in: [profileId]}})
+      .then(function(count){
+        req.profile.followersCount = count;
+
+        return Promise.resolve( count ? req.profile.save() : null)
+        .then(function(){
+          return res.json({profile: req.profile.toProfileJSONFor(user)});
+        })
+      });
     });
   }).catch(next);
 });
@@ -54,7 +62,15 @@ router.delete('/:username/follow', auth.required, function(req, res, next){
     }
 
     return user.unfollow(profileId).then(function(){
-      return res.json({profile: req.profile.toProfileJSONFor(user)});
+      return User.count({following: {$in: [profileId]}})
+      .then(function(count){
+        req.profile.followersCount = count;
+
+        return Promise.resolve( count ? req.profile.save() : null)
+        .then(function(){
+          return res.json({profile: req.profile.toProfileJSONFor(user)});
+        })
+      });
     });
   }).catch(next);
 });

@@ -1,60 +1,65 @@
 <div class="photos-page">
-
   <div class="container">
     <div class="row">
-      <div class="feed-toggle col-md-6 col-xs-12">
-        <ul class="nav nav-tabs">
+      <div *ngIf="currentUser?.username" class="side-bar col-sm-12 col-md-4 col-lg-3 col-xl-2">
+        <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link btn-sm btn-light"
-               [ngClass]="{'active': photoListConfig.type === 'all' && !photoListConfig.filters.tag}"
-               (click)="setPhotoListTo('all')">
-               All
+            <a class="nav-link"
+              [ngClass]="{'selected': flag === 'all'}"
+              (click)="setPhotoListTo('all')">
+              All
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link btn-sm btn-light"
-               [ngClass]="{'active': photoListConfig.type === 'feed'}"
-               (click)="setPhotoListTo('feed')">
-               Your Following
+
+          <li *ngIf="currentUser?.username" class="nav-item">
+            <a class="nav-link"
+              [ngClass]="{'selected': flag === 'feed'}"
+              (click)="setPhotoListTo('feed')">
+              Photos You Follow
             </a>
           </li>
-          <li class="nav-item" [hidden]="!photoListConfig.filters.tag">
-            <a class="nav-link active btn-sm btn-light">
-              <i class="ion-pound"></i> {{ photoListConfig.filters.tag }}
+
+          <li *ngIf="currentUser?.username" class="nav-item">
+            <a class="nav-link"
+              [ngClass]="{'selected': flag === 'upvoted'}"
+              (click)="setPhotoListTo('all', {upvoted: currentUser.username})">
+               Favorite Photos
+            </a>
+          </li>
+
+          <li *ngIf="currentUser?.username" class="nav-item">
+            <a class="nav-link"
+              [ngClass]="{'selected': flag === 'downvoted'}"
+              (click)="setPhotoListTo('all', {downvoted: currentUser.username})">
+              Unfavorite Photos
             </a>
           </li>
         </ul>
       </div>
 
-      <div *appShowAuthed="true" class="col-md-6 col-xs-12 text-right">
-        <button class="btn btn-light" routerLink="/photo-edit">
-          <i class="fa fa-pencil" aria-hidden="true"></i>&nbsp;&nbsp;
-          Add New Photo
-        </button>
-      </div>
+      <div class="col-sm-12"
+        [ngClass]="{'col-md-8 col-lg-9 col-xl-10': currentUser?.username}">
+        <app-photo-list [limit]="limit" [config]="photoListConfig"></app-photo-list>
 
-    </div>
+        <div class="">
+          <hr />
+          <div class="tag-list">
+            <a *ngFor="let tag of photoTags"
+               (click)="setPhotoListTo('all', {tag: tag})"
+               class="badge badge-pill badge-light">
+               <h6 [ngClass]="{'text-danger': selectedTag === tag}">{{ tag }}</h6>
+            </a>
+          </div>
 
-    <app-photo-list [limit]="limit" [config]="photoListConfig"></app-photo-list>
+          <div [hidden]="photoTagsLoaded">
+            Loading tags...
+          </div>
 
-    <div class="tags">
-
-      <div class="tag-list">
-        <a *ngFor="let tag of photoTags"
-           (click)="setPhotoListTo('all', {tag: tag})"
-           class="badge badge-pill badge-light">
-           <h6>{{ tag }}</h6>
-        </a>
-      </div>
-
-      <div [hidden]="photoTagsLoaded">
-        Loading tags...
-      </div>
-
-      <div [hidden]="!photoTagsLoaded || photoTags.length > 0">
-        No tags are here... yet.
+          <div [hidden]="!photoTagsLoaded || photoTags.length > 0">
+            No tags are here... yet.
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
 </div>
